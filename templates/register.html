@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rice Health System - Pendaftaran</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body { font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-[#F3F6F3] text-slate-900">
+  <div class="relative min-h-screen overflow-hidden">
+
+    <!-- Background decorative "rice" images (like screenshot corners) -->
+    <div class="pointer-events-none absolute inset-0">
+      <!-- top-right image -->
+      <div class="absolute right-0 top-0 h-64 w-72 opacity-80">
+        <div class="h-full w-full bg-[url('https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?auto=format&fit=crop&w=800&q=60')] bg-cover bg-center"></div>
+        <div class="absolute inset-0 bg-emerald-50/70"></div>
+      </div>
+
+      <!-- bottom-left image -->
+      <div class="absolute left-0 bottom-0 h-72 w-72 opacity-80">
+        <div class="h-full w-full bg-[url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=900&q=60')] bg-cover bg-center"></div>
+        <div class="absolute inset-0 bg-emerald-50/70"></div>
+      </div>
+
+      <!-- soft glow -->
+      <div class="absolute -top-28 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-emerald-300/20 blur-[100px]"></div>
+    </div>
+
+    <main class="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
+
+      <!-- Center card -->
+      <section class="w-full max-w-[420px] rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div class="px-8 py-9">
+          <!-- top icon -->
+          <div class="mx-auto mb-4 h-12 w-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
+            <!-- logo + warna konsisten -->
+            <i class="fa-solid fa-leaf text-emerald-600 text-lg"></i>
+          </div>
+
+          <h1 class="text-center text-2xl font-extrabold tracking-tight">Pendaftaran Akun</h1>
+          <p class="mt-2 text-center text-sm text-slate-500">
+            Gabung dengan Rice Health System untuk monitoring tanaman padi Anda.
+          </p>
+
+          <form class="mt-8 space-y-4" method="POST" action="#">
+            <!-- Nama -->
+            <div class="space-y-2">
+              <label class="text-xs font-extrabold text-slate-700">Nama Lengkap</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <i class="fa-regular fa-user"></i>
+                </span>
+                <input
+                  type="text"
+                  name="fullname"
+                  placeholder="Masukkan nama lengkap Anda"
+                  class="h-11 w-full rounded-xl border border-emerald-200 bg-white pl-10 pr-4 text-sm
+                         placeholder:text-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="space-y-2">
+              <label class="text-xs font-extrabold text-slate-700">Email</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <i class="fa-regular fa-envelope"></i>
+                </span>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="contoh@email.com"
+                  class="h-11 w-full rounded-xl border border-emerald-200 bg-white pl-10 pr-4 text-sm
+                         placeholder:text-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="space-y-2">
+              <label class="text-xs font-extrabold text-slate-700">Kata Sandi</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <i class="fa-solid fa-lock"></i>
+                </span>
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  placeholder="Buat kata sandi yang kuat"
+                  class="h-11 w-full rounded-xl border border-emerald-200 bg-white pl-10 pr-11 text-sm
+                         placeholder:text-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  required
+                />
+                <button
+                  type="button"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition"
+                  onclick="togglePassword('password','eye1')"
+                  aria-label="Tampilkan/Sembunyikan kata sandi"
+                >
+                  <i id="eye1" class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Konfirmasi Password -->
+            <div class="space-y-2">
+              <label class="text-xs font-extrabold text-slate-700">Konfirmasi Kata Sandi</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <i class="fa-solid fa-rotate"></i>
+                </span>
+                <input
+                  id="confirm"
+                  type="password"
+                  name="confirm_password"
+                  placeholder="Ulangi kata sandi Anda"
+                  class="h-11 w-full rounded-xl border border-emerald-200 bg-white pl-10 pr-4 text-sm
+                         placeholder:text-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="pt-1 flex items-start gap-2">
+              <input
+                id="terms"
+                type="checkbox"
+                class="mt-1 h-4 w-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500"
+                required
+              />
+              <label for="terms" class="text-xs text-slate-500 leading-relaxed">
+                Saya setuju dengan
+                <a href="#" class="font-extrabold text-emerald-600 hover:underline">Ketentuan Layanan</a>
+                dan
+                <a href="#" class="font-extrabold text-emerald-600 hover:underline">Kebijakan Privasi</a>
+              </label>
+            </div>
+
+            <!-- Submit -->
+            <button
+              type="submit"
+              class="mt-2 w-full rounded-xl bg-emerald-500 py-3 text-sm font-extrabold text-white
+                     hover:brightness-95 active:scale-[0.99] transition"
+            >
+              Daftar
+            </button>
+          </form>
+
+          <p class="mt-6 text-center text-xs text-slate-500">
+            Sudah punya akun?
+            <a href="#" class="font-extrabold text-emerald-600 hover:underline">Masuk</a>
+          </p>
+        </div>
+      </section>
+
+      <!-- bottom footnote (like screenshot) -->
+      <footer class="mt-10 text-center text-[10px] text-slate-400">
+        <div class="tracking-[0.2em] font-semibold">RICE HEALTH SYSTEM</div>
+        <div class="mt-1">© 2024 Pendaftaran Aman &amp; Terenkripsi</div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    function togglePassword(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      const isHidden = input.type === "password";
+      input.type = isHidden ? "text" : "password";
+      icon.className = isHidden ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<aside class="hidden md:flex w-72 flex-col bg-white border-r border-slate-200">
+
+  <!-- brand -->
+  <div class="px-6 py-6 flex items-center gap-3">
+    <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+      <i class="fa-solid fa-leaf text-emerald-600"></i>
+    </div>
+    <div class="font-extrabold tracking-tight">Rice Health System</div>
+  </div>
+
+  <!-- nav -->
+  <nav class="px-4 space-y-2">
+
+    <!-- BERANDA -->
+    <a href="{{ url_for('auth.admin_dashboard') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl
+       {% if request.path == '/admin/dashboard' %}
+         bg-emerald-500 text-white shadow-sm
+       {% else %}
+         text-slate-600 hover:bg-slate-50 transition
+       {% endif %}">
+      <i class="fa-solid fa-table-cells-large w-5
+         {% if request.path == '/admin/dashboard' %} text-white {% else %} text-emerald-500 {% endif %}">
+      </i>
+      <span class="font-semibold text-sm">Beranda</span>
+    </a>
+
+    <!-- KELOLA AKUN -->
+    <a href="{{ url_for('auth.users') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl
+       {% if request.path.startswith('/admin/users') %}
+         bg-emerald-500 text-white shadow-sm
+       {% else %}
+         text-slate-600 hover:bg-slate-50 transition
+       {% endif %}">
+      <i class="fa-solid fa-user-group w-5
+         {% if request.path.startswith('/admin/users') %} text-white {% else %} text-emerald-500 {% endif %}">
+      </i>
+      <span class="font-semibold text-sm">Kelola Akun</span>
+    </a>
+
+    <!-- DATA PENYAKIT -->
+    <a href="{{ url_for('auth.penyakit') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl
+       {% if request.path.startswith('/admin/penyakit') %}
+         bg-emerald-500 text-white shadow-sm
+       {% else %}
+         text-slate-600 hover:bg-slate-50 transition
+       {% endif %}">
+      <i class="fa-solid fa-virus-covid w-5
+         {% if request.path.startswith('/admin/penyakit') %} text-white {% else %} text-emerald-500 {% endif %}">
+      </i>
+      <span class="font-semibold text-sm">Data Penyakit</span>
+    </a>
+
+    <!-- VARIETAS PADI -->
+    <a href="{{ url_for('auth.varietas') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl
+       {% if request.path.startswith('/admin/varietas') %}
+         bg-emerald-500 text-white shadow-sm
+       {% else %}
+         text-slate-600 hover:bg-slate-50 transition
+       {% endif %}">
+      <i class="fa-solid fa-seedling w-5
+         {% if request.path.startswith('/admin/varietas') %} text-white {% else %} text-emerald-500 {% endif %}">
+      </i>
+      <span class="font-semibold text-sm">Varietas Padi</span>
+    </a>
+
+  </nav>
+
+  <!-- user -->
+  <div class="mt-auto p-4">
+    <a href="{{ url_for('auth.logout') }}"
+       class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center gap-3">
+      <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+        <i class="fa-solid fa-user text-amber-700"></i>
+      </div>
+      <div class="leading-tight">
+        <div class="text-sm font-bold">Administrator</div>
+        <div class="text-xs text-slate-500">admin@ricehealth.com</div>
+      </div>
+    </a>
+  </div>
+
+</aside>

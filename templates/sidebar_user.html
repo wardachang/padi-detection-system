@@ -1,0 +1,49 @@
+<aside class="hidden md:flex w-72 flex-col bg-white border-r border-slate-200">
+
+  <div class="px-6 py-6 flex items-center gap-3">
+    <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+      <i class="fa-solid fa-leaf text-emerald-600"></i>
+    </div>
+    <div class="font-extrabold tracking-tight">Rice Health System</div>
+  </div>
+
+  <nav class="px-4 space-y-2">
+
+    <a href="{{ url_for('auth.dashboard') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl {{ 'bg-emerald-500 text-white shadow-sm' if active == 'beranda_user' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+      <i class="fa-solid fa-table-cells-large {{ 'text-white' if active == 'beranda_user' else 'text-emerald-500' }} w-5"></i>
+      <span class="font-semibold text-sm">Beranda</span>
+    </a>
+
+    <a href="{{ url_for('auth.jadwal_user') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl {{ 'bg-emerald-500 text-white shadow-sm' if active == 'jadwal_user' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+      <i class="fa-solid fa-calendar-days {{ 'text-white' if active == 'jadwal_user' else 'text-emerald-500' }} w-5"></i>
+      <span class="font-semibold text-sm">Jadwal Tanam</span>
+    </a>
+
+    <a href="{{ url_for('deteksi') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl {{ 'bg-emerald-500 text-white shadow-sm' if active == 'deteksi' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+      <i class="fa-solid fa-magnifying-glass {{ 'text-white' if active == 'deteksi' else 'text-emerald-500' }} w-5"></i>
+      <span class="font-semibold text-sm">Deteksi Penyakit</span>
+    </a>
+
+    <a href="{{ url_for('auth.riwayat_user') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl {{ 'bg-emerald-500 text-white shadow-sm' if active == 'riwayat_user' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+      <i class="fa-solid fa-clock-rotate-left {{ 'text-white' if active == 'riwayat_user' else 'text-emerald-500' }} w-5"></i>
+      <span class="font-semibold text-sm">Riwayat</span>
+    </a>
+
+  </nav>
+
+  <div class="mt-auto p-4">
+    <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center gap-3">
+      <div class="h-10 w-10 rounded-full bg-emerald-200 flex items-center justify-center">
+        <i class="fa-solid fa-user text-emerald-700"></i>
+      </div>
+      <div class="leading-tight">
+        <div class="text-sm font-bold">Budi Santoso</div>
+      </div>
+    </div>
+  </div>
+
+</aside>

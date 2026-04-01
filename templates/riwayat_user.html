@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rice Health System - Riwayat</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body { font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-[#F3F6F3] text-slate-900">
+  <div class="min-h-screen flex">
+
+    {% include 'sidebar_user.html' %}
+
+    <main class="flex-1">
+      <div class="max-w-6xl mx-auto px-4 md:px-8 py-8">
+
+        <!-- Header -->
+        <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Riwayat Deteksi Pengguna</h1>
+            <p class="text-slate-600 max-w-3xl mt-1">
+              Tinjau hasil deteksi penyakit daun padi yang pernah Anda lakukan sebelumnya.
+            </p>
+          </div>
+
+          <form action="{{ url_for('auth.hapus_semua_riwayat') }}" method="POST"
+                onsubmit="return confirm('Yakin ingin menghapus semua riwayat?');">
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 rounded-xl bg-red-500 px-5 py-3 text-sm font-extrabold text-white hover:bg-red-600 transition"
+            >
+              <i class="fa-solid fa-trash-can"></i>
+              Hapus Semua Riwayat
+            </button>
+          </form>
+        </div>
+
+        <!-- Flash Message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mt-6 space-y-3">
+              {% for category, message in messages %}
+                <div class="rounded-xl px-4 py-3 text-sm font-medium border
+                  {% if category == 'success' %}
+                    bg-emerald-50 text-emerald-700 border-emerald-200
+                  {% else %}
+                    bg-red-50 text-red-700 border-red-200
+                  {% endif %}
+                ">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Stats -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+            <div class="text-xs font-semibold text-slate-500">Total Deteksi</div>
+            <div class="mt-2 flex items-end gap-3">
+              <div class="text-2xl font-extrabold">{{ histories|length }}</div>
+              <div class="text-xs font-extrabold text-emerald-600">Data tersimpan</div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+            <div class="text-xs font-semibold text-slate-500">Penyakit Terdeteksi</div>
+            <div class="mt-2 flex items-end gap-3">
+              <div class="text-2xl font-extrabold">
+                {{ histories | selectattr('hasil', 'ne', 'Healthy Rice Leaf') | list | length }}
+              </div>
+              <div class="text-xs font-extrabold text-orange-500">Perlu perhatian</div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+            <div class="text-xs font-semibold text-slate-500">Rata-rata Confidence</div>
+            <div class="mt-2 flex items-end gap-3">
+              <div class="text-2xl font-extrabold">
+                {% if histories|length > 0 %}
+                  {{ "%.1f"|format((histories | map(attribute='confidence') | sum) / (histories|length)) }}%
+                {% else %}
+                  0.0%
+                {% endif %}
+              </div>
+              <div class="text-xs font-extrabold text-emerald-600">Model CNN</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Bar -->
+        <div class="mt-6 rounded-2xl bg-white border border-slate-200 shadow-sm p-4">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            <div class="relative flex-1">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+              </span>
+              <div class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm flex items-center text-slate-500">
+                Data riwayat deteksi tersimpan otomatis setiap selesai prediksi
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <span class="h-11 inline-flex items-center rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-bold text-emerald-700">
+                Semua Hasil
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="mt-6 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead class="bg-slate-50">
+                <tr class="text-left text-[11px] font-extrabold tracking-widest text-slate-500">
+                  <th class="px-6 py-4">PRATINJAU</th>
+                  <th class="px-6 py-4">INFO DETEKSI</th>
+                  <th class="px-6 py-4">STATUS</th>
+                  <th class="px-6 py-4">KEPERCAYAAN CNN</th>
+                  <th class="px-6 py-4 text-right">AKSI</th>
+                </tr>
+              </thead>
+
+              <tbody class="divide-y divide-slate-100">
+                {% if histories %}
+                  {% for item in histories %}
+                  <tr class="bg-white hover:bg-slate-50 transition">
+                    <td class="px-6 py-4">
+                      <img
+                        class="h-14 w-14 rounded-xl object-cover border border-slate-200"
+                        src="{{ item.image_path }}"
+                        alt="preview"
+                      >
+                    </td>
+
+                    <td class="px-6 py-4">
+                      <div class="text-sm font-extrabold text-slate-900">{{ item.hasil }}</div>
+                      <div class="text-xs text-slate-500">
+                        {{ item.created_at.strftime('%d %b %Y • %H:%M') }}
+                      </div>
+                    </td>
+
+                    <td class="px-6 py-4">
+                      {% if item.hasil == 'Healthy Rice Leaf' %}
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
+                          Sehat
+                        </span>
+                      {% elif item.hasil == 'Brown Spot' %}
+                        <span class="inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-xs font-extrabold text-orange-700">
+                          Brown Spot
+                        </span>
+                      {% elif item.hasil == 'Leaf Blast' %}
+                        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-extrabold text-red-600">
+                          Leaf Blast
+                        </span>
+                      {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                        <span class="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-xs font-extrabold text-yellow-700">
+                          BLB
+                        </span>
+                      {% else %}
+                        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">
+                          {{ item.hasil }}
+                        </span>
+                      {% endif %}
+                    </td>
+
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div class="h-2 w-48 rounded-full bg-slate-100 overflow-hidden">
+                          {% if item.hasil == 'Healthy Rice Leaf' %}
+                            <div class="h-full bg-emerald-500" style="width: {{ item.confidence }}%;"></div>
+                          {% elif item.hasil == 'Brown Spot' %}
+                            <div class="h-full bg-orange-500" style="width: {{ item.confidence }}%;"></div>
+                          {% elif item.hasil == 'Leaf Blast' %}
+                            <div class="h-full bg-red-500" style="width: {{ item.confidence }}%;"></div>
+                          {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                            <div class="h-full bg-yellow-500" style="width: {{ item.confidence }}%;"></div>
+                          {% else %}
+                            <div class="h-full bg-slate-500" style="width: {{ item.confidence }}%;"></div>
+                          {% endif %}
+                        </div>
+                        <div class="text-xs font-extrabold text-slate-700">
+                          {{ "%.1f"|format(item.confidence) }}%
+                        </div>
+                      </div>
+                    </td>
+
+                    <td class="px-6 py-4 text-right">
+                      <div class="flex items-center justify-end gap-4">
+                        <button
+                          type="button"
+                          class="text-sm font-extrabold text-emerald-600 hover:underline"
+                          onclick="openDetailModal(
+                            '{{ item.image_path }}',
+                            '{{ item.hasil|escape }}',
+                            '{{ '%.2f'|format(item.confidence) }}',
+                            `{{ (item.deskripsi or '-')|replace('`', '\\`') }}`
+                          )"
+                        >
+                          Lihat Detail
+                        </button>
+
+                        <form action="{{ url_for('auth.hapus_riwayat', id=item.id) }}" method="POST"
+                              onsubmit="return confirm('Yakin ingin menghapus riwayat ini?');">
+                          <button
+                            type="submit"
+                            class="text-sm font-extrabold text-red-600 hover:underline"
+                          >
+                            Hapus
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="px-6 py-10 text-center text-slate-500">
+                      Belum ada riwayat deteksi.
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="px-6 py-4 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="text-xs text-slate-500">
+              Menampilkan {{ histories|length }} data riwayat deteksi
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button class="h-9 px-4 rounded-lg bg-emerald-500 text-white font-extrabold">
+                Riwayat
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Detail -->
+  <div id="detailModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="font-extrabold text-slate-900">Detail Riwayat Deteksi</h3>
+        <button onclick="closeDetailModal()" class="text-slate-500 hover:text-slate-700 text-xl">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+        <div>
+          <img id="modalImage" src="" alt="Preview" class="w-full h-72 object-cover rounded-2xl border border-slate-200">
+        </div>
+
+        <div>
+          <div class="text-xs font-extrabold tracking-widest text-emerald-600">HASIL DETEKSI</div>
+          <h2 id="modalResult" class="mt-2 text-2xl font-extrabold text-slate-900"></h2>
+
+          <div class="mt-4 text-sm font-bold text-slate-700">
+            Confidence: <span id="modalConfidence"></span>%
+          </div>
+
+          <div class="mt-6">
+            <div class="font-extrabold text-slate-800">Deskripsi</div>
+            <p id="modalDescription" class="mt-2 text-slate-600 leading-7"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openDetailModal(image, result, confidence, description) {
+      document.getElementById("modalImage").src = image;
+      document.getElementById("modalResult").textContent = result;
+      document.getElementById("modalConfidence").textContent = confidence;
+      document.getElementById("modalDescription").textContent = description || "-";
+
+      const modal = document.getElementById("detailModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeDetailModal() {
+      const modal = document.getElementById("detailModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    document.getElementById("detailModal").addEventListener("click", function (e) {
+      if (e.target === this) {
+        closeDetailModal();
+      }
+    });
+  </script>
+</body>
+</html>
