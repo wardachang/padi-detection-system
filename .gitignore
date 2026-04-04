@@ -1,5 +1,69 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
 # Virtual Environment
 venv/
 .venv/
 env/
 ENV/
+env.bak/
+venv.bak/
+
+# Laragon / Windows specific
+*.log
+*.tmp
+Thumbs.db
+.DS_Store
+
+# Dataset & Model AI (biasanya besar)
+dataset/
+data/
+*.h5
+*.hdf5
+*.pb
+*.onnx
+saved_model/
+model/*.h5
+model/*.pb
+
+# Upload file user
+static/uploads/
+uploads/
+media/
+
+# Database
+*.db
+*.sqlite3
+db.sqlite3
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# TensorFlow & ML cache
+.tensorflow/
+tf_cache/
+.cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
