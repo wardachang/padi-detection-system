@@ -5,15 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rice Health System - Beranda</title>
 
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-
-  <!-- Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
@@ -24,36 +19,31 @@
 <body class="min-h-screen bg-[#F3F6F3] text-slate-900">
   <div class="min-h-screen flex">
 
-    <!-- SIDEBAR -->
     {% include 'sidebar_user.html' %}
 
-    <!-- MAIN -->
     <main class="flex-1">
-      <!-- top bar -->
       <div class="h-14 bg-white border-b border-slate-200 flex items-center px-6">
         <div class="font-extrabold text-sm">Beranda</div>
       </div>
 
       <div class="max-w-6xl mx-auto px-4 md:px-8 py-8">
-        <!-- greeting -->
         <div>
-          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Halo, Budi Santoso!</h1>
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+            Halo, {{ current_user.fullname }}!
+          </h1>
           <p class="mt-2 text-slate-600">
             Pantau tanaman padi Anda dan deteksi penyakit secara instan dengan AI.
           </p>
         </div>
 
-        <!-- Stat cards -->
         <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Total Deteksi -->
           <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
             <div class="flex items-start justify-between">
               <div>
                 <div class="text-xs font-semibold text-slate-500">Total Deteksi</div>
-                <div class="mt-2 text-2xl font-extrabold">128</div>
+                <div class="mt-2 text-2xl font-extrabold">{{ total_deteksi }}</div>
                 <div class="mt-2 text-xs font-bold text-emerald-600">
-                  <i class="fa-solid fa-arrow-trend-up"></i>
-                  +12% vs bulan lalu
+                  Data milik akun Anda
                 </div>
               </div>
               <div class="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
@@ -62,14 +52,13 @@
             </div>
           </div>
 
-          <!-- Tanaman Sehat -->
           <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
             <div class="flex items-start justify-between">
               <div>
                 <div class="text-xs font-semibold text-slate-500">Tanaman Sehat</div>
-                <div class="mt-2 text-2xl font-extrabold">94</div>
+                <div class="mt-2 text-2xl font-extrabold">{{ total_sehat }}</div>
                 <div class="mt-2 text-xs font-semibold text-slate-500">
-                  73.4% dari total deteksi
+                  Berdasarkan hasil deteksi Anda
                 </div>
               </div>
               <div class="h-9 w-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
@@ -78,15 +67,13 @@
             </div>
           </div>
 
-          <!-- Masalah Terdeteksi -->
           <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
             <div class="flex items-start justify-between">
               <div>
                 <div class="text-xs font-semibold text-slate-500">Masalah Terdeteksi</div>
-                <div class="mt-2 text-2xl font-extrabold">34</div>
+                <div class="mt-2 text-2xl font-extrabold">{{ total_penyakit }}</div>
                 <div class="mt-2 text-xs font-bold text-red-500">
-                  <i class="fa-solid fa-arrow-trend-up"></i>
-                  +5% akurasi pemindaian
+                  Perlu perhatian
                 </div>
               </div>
               <div class="h-9 w-9 rounded-xl bg-red-100 flex items-center justify-center text-red-600">
@@ -96,9 +83,7 @@
           </div>
         </div>
 
-        <!-- Action cards -->
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <!-- Upload -->
           <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-6">
             <div class="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/30 p-10 flex flex-col items-center justify-center text-center">
               <div class="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -107,7 +92,7 @@
               <div class="mt-4 font-extrabold">Unggah Foto untuk Deteksi</div>
               <div class="mt-1 text-sm text-slate-500">Mendukung file JPG, PNG hingga 10MB</div>
 
-              <a href="#"
+              <a href="{{ url_for('deteksi') }}"
                  class="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-extrabold text-white hover:brightness-95 transition">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
                 Mulai Unggah
@@ -115,145 +100,74 @@
             </div>
           </div>
 
-          <!-- Jadwal Tanam card -->
           <div class="relative overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
             <div class="h-full w-full bg-[url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60')] bg-cover bg-center"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent"></div>
 
             <div class="absolute left-6 top-6">
               <span class="inline-flex items-center rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-extrabold text-white">
-                FASE BERIKUTNYA SEGERA
+                JADWAL TANAM
               </span>
             </div>
 
             <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
               <div class="text-xl font-extrabold">Lihat Jadwal Tanam</div>
               <p class="mt-2 text-sm text-white/80 max-w-md">
-                Optimalkan waktu panen Anda berdasarkan cuaca lokal dan varietas tanaman.
+                Optimalkan waktu panen Anda berdasarkan jadwal tanam akun ini.
               </p>
 
-              <a href="#" class="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-emerald-300 hover:text-emerald-200 transition">
+              <a href="{{ url_for('auth.jadwal_user') }}" class="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-emerald-300 hover:text-emerald-200 transition">
                 Buka Jadwal
                 <i class="fa-solid fa-arrow-right"></i>
               </a>
             </div>
-
-            <button class="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/20 text-white hover:bg-white/30 transition">
-              <i class="fa-solid fa-chevron-right"></i>
-            </button>
           </div>
         </div>
 
-        <!-- Table -->
         <div class="mt-6 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
           <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div class="font-extrabold text-sm">Riwayat Deteksi Terbaru</div>
-            <a href="#" class="text-xs font-extrabold text-emerald-600 hover:underline">Lihat Semua</a>
+            <a href="{{ url_for('auth.riwayat_user') }}" class="text-xs font-extrabold text-emerald-600 hover:underline">Lihat Semua</a>
           </div>
 
           <div class="overflow-x-auto">
             <table class="min-w-full">
               <thead class="bg-slate-50">
                 <tr class="text-left text-[11px] font-extrabold tracking-widest text-slate-500">
-                  <th class="px-6 py-3">SAMPEL TANAMAN</th>
+                  <th class="px-6 py-3">PRATINJAU</th>
                   <th class="px-6 py-3">HASIL DETEKSI</th>
                   <th class="px-6 py-3">TANGGAL</th>
                   <th class="px-6 py-3">KEYAKINAN</th>
-                  <th class="px-6 py-3 text-right">AKSI</th>
                 </tr>
               </thead>
 
               <tbody class="divide-y divide-slate-100">
-                <tr>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <img class="h-9 w-9 rounded-lg object-cover border border-slate-200"
-                           src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=120&q=60"
-                           alt="sampel"/>
-                      <div class="text-sm font-semibold text-slate-800">Sampel #0822</div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-600">
-                      Hawar Daun (Blast)
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-sm text-slate-500">24 Okt 2023</td>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="h-2 w-40 rounded-full bg-slate-100 overflow-hidden">
-                        <div class="h-full w-[94%] bg-red-500"></div>
-                      </div>
-                      <div class="text-xs font-bold text-slate-700">94%</div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <button class="h-9 w-9 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 hover:bg-slate-100 transition">
-                      <i class="fa-regular fa-eye"></i>
-                    </button>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <img class="h-9 w-9 rounded-lg object-cover border border-slate-200"
-                           src="https://images.unsplash.com/photo-1598514982205-fd8f7fc2e2aa?auto=format&fit=crop&w=120&q=60"
-                           alt="sampel"/>
-                      <div class="text-sm font-semibold text-slate-800">Sampel #0821</div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
-                      Sehat
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-sm text-slate-500">23 Okt 2023</td>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="h-2 w-40 rounded-full bg-slate-100 overflow-hidden">
-                        <div class="h-full w-[98%] bg-emerald-500"></div>
-                      </div>
-                      <div class="text-xs font-bold text-slate-700">98%</div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <button class="h-9 w-9 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 hover:bg-slate-100 transition">
-                      <i class="fa-regular fa-eye"></i>
-                    </button>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <img class="h-9 w-9 rounded-lg object-cover border border-slate-200"
-                           src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=120&q=60"
-                           alt="sampel"/>
-                      <div class="text-sm font-semibold text-slate-800">Sampel #0819</div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
-                      Hawar Bakteri
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-sm text-slate-500">21 Okt 2023</td>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="h-2 w-40 rounded-full bg-slate-100 overflow-hidden">
-                        <div class="h-full w-[87%] bg-amber-500"></div>
-                      </div>
-                      <div class="text-xs font-bold text-slate-700">87%</div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <button class="h-9 w-9 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 hover:bg-slate-100 transition">
-                      <i class="fa-regular fa-eye"></i>
-                    </button>
-                  </td>
-                </tr>
-
+                {% if histories %}
+                  {% for item in histories %}
+                  <tr>
+                    <td class="px-6 py-4">
+                      <img class="h-10 w-10 rounded-lg object-cover border border-slate-200"
+                           src="{{ item.image_path }}"
+                           alt="preview"/>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="text-sm font-semibold text-slate-800">{{ item.hasil }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-500">
+                      {{ item.created_at.strftime('%d %b %Y • %H:%M') }}
+                    </td>
+                    <td class="px-6 py-4 text-sm font-bold text-slate-700">
+                      {{ "%.1f"|format(item.confidence) }}%
+                    </td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="4" class="px-6 py-8 text-center text-slate-500">
+                      Belum ada riwayat deteksi untuk akun ini.
+                    </td>
+                  </tr>
+                {% endif %}
               </tbody>
             </table>
           </div>

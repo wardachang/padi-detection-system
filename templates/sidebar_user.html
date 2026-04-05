@@ -33,17 +33,48 @@
       <span class="font-semibold text-sm">Riwayat</span>
     </a>
 
+    <a href="{{ url_for('auth.profile_user') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl {{ 'bg-emerald-500 text-white shadow-sm' if active == 'profile_user' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+      <i class="fa-solid fa-user {{ 'text-white' if active == 'profile_user' else 'text-emerald-500' }} w-5"></i>
+      <span class="font-semibold text-sm">Profil Saya</span>
+    </a>
+
   </nav>
 
+  <!-- USER INFO -->
   <div class="mt-auto p-4">
-    <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center gap-3">
-      <div class="h-10 w-10 rounded-full bg-emerald-200 flex items-center justify-center">
-        <i class="fa-solid fa-user text-emerald-700"></i>
+    <a href="{{ url_for('auth.profile_user') }}"
+       class="block rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center gap-3 hover:bg-slate-100 transition">
+
+      <div class="h-10 w-10 rounded-full overflow-hidden border border-emerald-200 bg-white">
+        {% if current_user.is_authenticated and current_user.profile_image %}
+          <img
+            src="{{ current_user.profile_image }}"
+            alt="Foto Profil"
+            class="h-full w-full object-cover"
+          >
+        {% elif current_user.is_authenticated %}
+          <img
+            src="https://ui-avatars.com/api/?name={{ current_user.fullname|urlencode }}&background=D1FAE5&color=065F46&size=200"
+            alt="Avatar"
+            class="h-full w-full object-cover"
+          >
+        {% else %}
+          <div class="h-full w-full bg-emerald-200 flex items-center justify-center">
+            <i class="fa-solid fa-user text-emerald-700"></i>
+          </div>
+        {% endif %}
       </div>
+
       <div class="leading-tight">
-        <div class="text-sm font-bold">Budi Santoso</div>
+        {% if current_user.is_authenticated %}
+          <div class="text-sm font-bold">{{ current_user.fullname }}</div>
+          <div class="text-xs text-slate-500">{{ current_user.email }}</div>
+        {% else %}
+          <div class="text-sm font-bold">Guest</div>
+        {% endif %}
       </div>
-    </div>
+    </a>
   </div>
 
 </aside>

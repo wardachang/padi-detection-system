@@ -5,15 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Beranda - Rice Health System</title>
 
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
-  <!-- Inter Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
@@ -24,16 +21,12 @@
 <body class="h-full bg-[#F3F6F3] text-slate-900">
   <div class="min-h-screen flex">
 
-    <!-- SIDEBAR -->
     {% include 'sidebar_admin.html' %}
 
-    <!-- MAIN CONTENT -->
     <main class="flex-1">
-      <!-- top bar kosong seperti screenshot -->
       <div class="h-12 border-b border-slate-200 bg-[#F3F6F3]"></div>
 
       <div class="px-6 md:px-8 py-8">
-        <!-- title -->
         <div class="mb-8">
           <h1 class="text-3xl font-extrabold tracking-tight text-slate-800">
             Ringkasan Dashboard
@@ -41,72 +34,50 @@
         </div>
 
         <!-- summary cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-          <!-- card 1 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-6">
+
+          <!-- TOTAL PENGGUNA -->
           <div class="bg-white border border-emerald-100 rounded-2xl shadow-sm p-5">
             <div class="flex items-start justify-between">
               <div class="h-11 w-11 rounded-xl bg-emerald-100 flex items-center justify-center">
                 <i class="fa-solid fa-users text-emerald-500"></i>
               </div>
-              <span class="text-[11px] font-bold px-2 py-1 rounded-md bg-emerald-50 text-emerald-500">
-                +12%
-              </span>
             </div>
             <div class="mt-5 text-[11px] font-extrabold tracking-widest uppercase text-slate-400">
               Total Pengguna
             </div>
             <div class="mt-2 text-4xl font-extrabold tracking-tight text-slate-900">
+              {{ total_pengguna }}
             </div>
           </div>
 
-          <!-- card 2 -->
+          <!-- PENYAKIT TERDETEKSI -->
           <div class="bg-white border border-emerald-100 rounded-2xl shadow-sm p-5">
             <div class="flex items-start justify-between">
               <div class="h-11 w-11 rounded-xl bg-red-100 flex items-center justify-center">
                 <i class="fa-solid fa-bug text-red-500"></i>
               </div>
-              <span class="text-[11px] font-bold px-2 py-1 rounded-md bg-red-50 text-red-500">
-                +5%
-              </span>
             </div>
             <div class="mt-5 text-[11px] font-extrabold tracking-widest uppercase text-slate-400">
               Penyakit Terdeteksi
             </div>
             <div class="mt-2 text-4xl font-extrabold tracking-tight text-slate-900">
+              {{ penyakit_terdeteksi }}
             </div>
           </div>
 
-          <!-- card 3 -->
-          <div class="bg-white border border-emerald-100 rounded-2xl shadow-sm p-5">
-            <div class="flex items-start justify-between">
-              <div class="h-11 w-11 rounded-xl bg-blue-100 flex items-center justify-center">
-                <i class="fa-solid fa-leaf text-blue-500"></i>
-              </div>
-              <span class="text-[11px] font-bold px-2 py-1 rounded-md bg-blue-50 text-blue-500">
-                Stabil
-              </span>
-            </div>
-            <div class="mt-5 text-[11px] font-extrabold tracking-widest uppercase text-slate-400">
-              Varietas Padi
-            </div>
-            <div class="mt-2 text-4xl font-extrabold tracking-tight text-slate-900">
-            </div>
-          </div>
-
-          <!-- card 4 -->
+          <!-- TOTAL DETEKSI -->
           <div class="bg-white border border-emerald-100 rounded-2xl shadow-sm p-5">
             <div class="flex items-start justify-between">
               <div class="h-11 w-11 rounded-xl bg-emerald-100 flex items-center justify-center">
                 <i class="fa-solid fa-expand text-emerald-500"></i>
               </div>
-              <span class="text-[11px] font-bold px-2 py-1 rounded-md bg-emerald-50 text-emerald-500">
-                +18%
-              </span>
             </div>
             <div class="mt-5 text-[11px] font-extrabold tracking-widest uppercase text-slate-400">
               Total Deteksi
             </div>
             <div class="mt-2 text-4xl font-extrabold tracking-tight text-slate-900">
+              {{ total_deteksi }}
             </div>
           </div>
         </div>
@@ -115,23 +86,81 @@
         <section class="bg-white border border-emerald-100 rounded-2xl shadow-sm overflow-hidden">
           <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
             <h2 class="font-extrabold text-xl text-slate-800">Aktivitas Deteksi Terbaru</h2>
-            <a href="#" class="text-sm font-bold text-emerald-500 hover:text-emerald-600">
-              Lihat Semua
-            </a>
           </div>
 
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead class="bg-slate-50 border-b border-slate-100">
                 <tr class="text-left">
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">Nama Petani</th>
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">Jenis Varietas</th>
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">Status Deteksi</th>
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">Kepercayaan</th>
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">Waktu</th>
+                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">
+                    Nama Petani
+                  </th>
+                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">
+                    Status Deteksi
+                  </th>
+                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">
+                    Kepercayaan
+                  </th>
+                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">
+                    Waktu
+                  </th>
                 </tr>
               </thead>
-  </table>
+
+              <tbody class="divide-y divide-slate-100">
+                {% if aktivitas_terbaru %}
+                  {% for item, user in aktivitas_terbaru %}
+                  <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4">
+                      <div class="font-semibold text-slate-800">
+                        {{ user.fullname }}
+                      </div>
+                    </td>
+
+                    <td class="px-6 py-4">
+                      {% if item.hasil == 'Healthy Rice Leaf' %}
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
+                          Sehat
+                        </span>
+                      {% elif item.hasil == 'Brown Spot' %}
+                        <span class="inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700">
+                          Brown Spot
+                        </span>
+                      {% elif item.hasil == 'Leaf Blast' %}
+                        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">
+                          Leaf Blast
+                        </span>
+                      {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                        <span class="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-xs font-bold text-yellow-700">
+                          Bacterial Leaf Blight
+                        </span>
+                      {% else %}
+                        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+                          {{ item.hasil }}
+                        </span>
+                      {% endif %}
+                    </td>
+
+                    <td class="px-6 py-4">
+                      <div class="font-semibold text-slate-700">
+                        {{ "%.1f"|format(item.confidence) }}%
+                      </div>
+                    </td>
+
+                    <td class="px-6 py-4 text-sm text-slate-500">
+                      {{ item.created_at.strftime('%d %b %Y • %H:%M') }}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="4" class="px-6 py-8 text-center text-slate-500">
+                      Belum ada aktivitas deteksi.
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
           </div>
         </section>
       </div>
