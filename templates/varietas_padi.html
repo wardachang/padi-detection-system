@@ -2,198 +2,138 @@
 <html lang="id" class="h-full">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Varietas Padi - Rice Health System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Varietas Padi</title>
 
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
-    body { font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body { font-family: "Inter", sans-serif; }
+
+    .action-btn {
+      height: 36px;
+      width: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      transition: all .2s;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 
 <body class="h-full bg-[#F3F6F3] text-slate-900">
-  <div class="min-h-screen flex">
+<div class="min-h-screen flex">
 
-    <!-- SIDEBAR -->
-    {% include 'sidebar_admin.html' %}
+  {% include 'sidebar_admin.html' %}
 
-    <!-- MAIN -->
-    <main class="flex-1">
-      <div class="h-14 border-b border-slate-200 bg-[#F3F6F3]"></div>
+  <main class="flex-1">
+    <div class="max-w-6xl mx-auto px-6 py-8">
 
-      <div class="max-w-6xl mx-auto px-6 md:px-8 py-8">
-        <!-- HEADER -->
-        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-7">
-          <div>
-            <h1 class="text-3xl font-extrabold tracking-tight text-slate-800">Kelola Varietas Padi</h1>
-            <p class="mt-2 text-slate-500">
-              Konfigurasi parameter durasi pertumbuhan varietas padi.
-            </p>
+      <!-- FLASH MESSAGE -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-4 space-y-2">
+            {% for category, message in messages %}
+              <div class="rounded-xl px-4 py-3 text-sm font-semibold
+                {% if category == 'success' %}
+                  bg-green-100 text-green-700 border border-green-200
+                {% else %}
+                  bg-red-100 text-red-700 border border-red-200
+                {% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
           </div>
+        {% endif %}
+      {% endwith %}
 
-          <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-white font-extrabold shadow-sm hover:brightness-95 transition">
-            <i class="fa-solid fa-plus"></i>
-            Tambah Varietas Baru
-          </button>
+      <!-- HEADER -->
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-3xl font-extrabold">Kelola Varietas Padi</h1>
+          <p class="text-slate-500 text-sm mt-1">
+            Konfigurasi jadwal pertumbuhan varietas padi
+          </p>
         </div>
 
-        <!-- STATS -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="h-11 w-11 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <i class="fa-solid fa-chart-column text-emerald-500"></i>
-                </div>
-                <div>
-                  <div class="text-sm text-slate-400 font-semibold">Total Terdaftar</div>
-                  <div class="text-4xl font-extrabold tracking-tight mt-1">{{ stats.total }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="h-11 w-11 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <i class="fa-solid fa-clock text-emerald-500"></i>
-                </div>
-                <div>
-                  <div class="text-sm text-slate-400 font-semibold">Jangka Pendek (&lt; 110 hari)</div>
-                  <div class="text-4xl font-extrabold tracking-tight mt-1">{{ stats.jangka_pendek }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="h-11 w-11 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <i class="fa-solid fa-recycle text-emerald-500"></i>
-                </div>
-                <div>
-                  <div class="text-sm text-slate-400 font-semibold">Durasi Rata-rata</div>
-                  <div class="text-4xl font-extrabold tracking-tight mt-1">{{ stats.rata_rata }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TABLE -->
-        <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-            <h2 class="font-extrabold text-xl text-slate-800">Daftar Varietas</h2>
-
-            <button class="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-emerald-500 transition">
-              <i class="fa-solid fa-filter text-emerald-500"></i>
-              Filter
-            </button>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-slate-50 border-b border-slate-100">
-                <tr class="text-left">
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">Nama Varietas</th>
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">Total Durasi</th>
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">Fase Pertumbuhan</th>
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400">Status</th>
-                  <th class="px-6 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-400 text-center">Aksi</th>
-                </tr>
-              </thead>
-
-              <tbody class="divide-y divide-slate-100">
-                {% for item in varietas_list %}
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="px-6 py-5">
-                    <div class="flex items-center gap-4">
-                      <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                        <i class="fa-solid fa-wheat-awn text-emerald-500"></i>
-                      </div>
-                      <div>
-                        <div class="font-bold text-slate-800">{{ item.nama }}</div>
-                        <div class="text-sm text-slate-400">ID: {{ item.id_var }}</div>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td class="px-6 py-5 text-sm font-semibold text-slate-700">
-                    {{ item.durasi }}
-                  </td>
-
-                  <td class="px-6 py-5 min-w-[260px]">
-                    <div class="w-full">
-                      <div class="h-2 rounded-full bg-emerald-100 overflow-hidden flex">
-                        <div class="bg-[#1FD13A]" style="width: {{ item.veg }}%"></div>
-                        <div class="bg-[#67E280]" style="width: {{ item.rep }}%"></div>
-                        <div class="bg-[#A7F0B7]" style="width: {{ item.pem }}%"></div>
-                      </div>
-
-                      <div class="mt-2 flex items-center justify-between text-[11px] text-slate-400">
-                        <span>{{ item.veg }}h Veg.</span>
-                        <span>{{ item.rep }}h Rep.</span>
-                        <span>{{ item.pem }}h Pem.</span>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td class="px-6 py-5">
-                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-600">
-                      {{ item.status }}
-                    </span>
-                  </td>
-
-                  <td class="px-6 py-5">
-                    <div class="flex items-center justify-center gap-5">
-                      <button class="text-slate-400 hover:text-emerald-500 transition">
-                        <i class="fa-solid fa-pen"></i>
-                      </button>
-                      <button class="text-slate-400 hover:text-red-500 transition">
-                        <i class="fa-solid fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="px-6 py-4 border-t border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div class="text-sm text-slate-400">
-              Menampilkan 2 dari 42 varietas padi
-            </div>
-
-            <div class="flex items-center gap-2">
-              <button class="h-9 w-9 rounded-lg border border-slate-200 text-slate-300 hover:bg-slate-50">
-                <i class="fa-solid fa-chevron-left text-xs"></i>
-              </button>
-
-              <button class="h-9 min-w-9 px-3 rounded-lg bg-emerald-500 text-white font-bold">1</button>
-              <button class="h-9 min-w-9 px-3 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold">2</button>
-
-              <button class="h-9 w-9 rounded-lg border border-slate-200 text-emerald-500 hover:bg-slate-50">
-                <i class="fa-solid fa-chevron-right text-xs"></i>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <div class="mt-20 border-t border-slate-200 pt-6 text-center text-sm text-slate-400">
-          © 2024 Rice Health System - Sistem Deteksi Penyakit Padi
-        </div>
+        <!-- FIXED BUTTON -->
+        <a href="{{ url_for('auth.tambah_varietas') }}"
+           class="bg-emerald-500 text-white px-5 py-2 rounded-xl font-bold hover:brightness-95 transition">
+          <i class="fa-solid fa-plus mr-2"></i>Tambah
+        </a>
       </div>
-    </main>
-  </div>
+
+      <!-- TABLE -->
+      <div class="bg-white rounded-2xl shadow border border-slate-200 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-6 py-4 text-left">Nama</th>
+              <th class="px-6 py-4 text-center">Penyemaian</th>
+              <th class="px-6 py-4 text-center">Penanaman</th>
+              <th class="px-6 py-4 text-center">Pupuk 1</th>
+              <th class="px-6 py-4 text-center">Pupuk 2</th>
+              <th class="px-6 py-4 text-center">Panen</th>
+              <th class="px-6 py-4 text-center">Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for v in varietas_list %}
+            <tr class="border-t hover:bg-slate-50">
+              <td class="px-6 py-4 font-bold">{{ v.nama }}</td>
+              <td class="px-6 py-4 text-center">{{ v.hari_penyemaian }} hari</td>
+              <td class="px-6 py-4 text-center">{{ v.hari_penanaman }} hari</td>
+              <td class="px-6 py-4 text-center">{{ v.hari_pemupukan_1 or '-' }}</td>
+              <td class="px-6 py-4 text-center">{{ v.hari_pemupukan_2 or '-' }}</td>
+              <td class="px-6 py-4 text-center font-bold text-emerald-600">
+                {{ v.hari_panen }} hari
+              </td>
+
+              <td class="px-6 py-4">
+                <div class="flex justify-center gap-2">
+
+                  <!-- EDIT -->
+                  <a href="{{ url_for('auth.edit_varietas', id=v.id) }}"
+                     class="action-btn bg-emerald-500 text-white hover:bg-emerald-600">
+                    <i class="fa-solid fa-pen"></i>
+                  </a>
+
+                  <!-- DELETE -->
+                  <form method="POST"
+                        action="{{ url_for('auth.delete_varietas', id=v.id) }}"
+                        onsubmit="return confirm('Hapus varietas ini?')">
+                    <button type="submit"
+                            class="action-btn bg-red-500 text-white hover:bg-red-600">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </form>
+
+                </div>
+              </td>
+            </tr>
+
+            {% else %}
+            <tr>
+              <td colspan="7" class="px-6 py-6 text-center text-slate-500">
+                Belum ada data varietas.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+</div>
 </body>
 </html>

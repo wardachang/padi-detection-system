@@ -152,7 +152,7 @@
                   <th class="px-6 py-4 font-extrabold">Telepon</th>
                   <th class="px-6 py-4 font-extrabold">Riwayat</th>
                   <th class="px-6 py-4 font-extrabold">Status</th>
-                  <th class="px-6 py-4 font-extrabold">Aksi</th>
+                  <th class="px-6 py-4 font-extrabold text-center w-[220px]">Aksi</th>
                 </tr>
               </thead>
 
@@ -212,65 +212,73 @@
                   </td>
 
                   <td class="px-6 py-4">
-                    <div class="flex flex-wrap gap-2 min-w-[320px]">
+                    <div class="flex items-center justify-center gap-2">
+
+                      <!-- DETAIL -->
                       <button
                         type="button"
                         onclick="openModal('detailModal{{ user.id }}')"
-                        class="inline-flex items-center justify-center rounded-xl bg-sky-500 px-4 py-2 text-xs font-extrabold text-white hover:bg-sky-600 transition"
+                        title="Detail"
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-white hover:bg-sky-600 transition"
                       >
-                        <i class="fa-solid fa-eye mr-2"></i>
-                        Detail
+                        <i class="fa-solid fa-eye text-sm"></i>
                       </button>
 
+                      <!-- EDIT -->
                       <button
                         type="button"
                         onclick="openModal('editModal{{ user.id }}')"
-                        class="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-4 py-2 text-xs font-extrabold text-white hover:bg-emerald-600 transition"
+                        title="Edit"
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition"
                       >
-                        <i class="fa-solid fa-pen-to-square mr-2"></i>
-                        Edit
+                        <i class="fa-solid fa-pen-to-square text-sm"></i>
                       </button>
 
+                      <!-- TOGGLE STATUS -->
                       <form
                         id="toggleForm{{ user.id }}"
                         method="POST"
                         action="{{ url_for('auth.toggle_user_status', user_id=user.id, q=q, status=status, page=users.page) }}"
+                        class="inline"
                       >
                         {% if user.is_active %}
                           <button
                             type="button"
+                            title="Nonaktifkan"
                             onclick="openConfirmModal('Ubah Status Akun', 'Yakin ingin menonaktifkan akun {{ user.fullname }}?', 'warning', 'toggleForm{{ user.id }}')"
-                            class="inline-flex items-center justify-center rounded-xl bg-amber-500 px-4 py-2 text-xs font-extrabold text-white hover:bg-amber-600 transition"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition"
                           >
-                            <i class="fa-solid fa-user-slash mr-2"></i>
-                            Nonaktifkan
+                            <i class="fa-solid fa-user-slash text-sm"></i>
                           </button>
                         {% else %}
                           <button
                             type="button"
+                            title="Aktifkan"
                             onclick="openConfirmModal('Ubah Status Akun', 'Yakin ingin mengaktifkan akun {{ user.fullname }}?', 'success', 'toggleForm{{ user.id }}')"
-                            class="inline-flex items-center justify-center rounded-xl bg-green-500 px-4 py-2 text-xs font-extrabold text-white hover:bg-green-600 transition"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-green-500 text-white hover:bg-green-600 transition"
                           >
-                            <i class="fa-solid fa-user-check mr-2"></i>
-                            Aktifkan
+                            <i class="fa-solid fa-user-check text-sm"></i>
                           </button>
                         {% endif %}
                       </form>
 
+                      <!-- HAPUS -->
                       <form
                         id="deleteForm{{ user.id }}"
                         method="POST"
                         action="{{ url_for('auth.delete_user_admin', user_id=user.id, q=q, status=status, page=users.page) }}"
+                        class="inline"
                       >
                         <button
                           type="button"
+                          title="Hapus"
                           onclick="openConfirmModal('Hapus Akun', 'Akun {{ user.fullname }} akan dihapus permanen. Lanjutkan?', 'danger', 'deleteForm{{ user.id }}')"
-                          class="inline-flex items-center justify-center rounded-xl bg-red-500 px-4 py-2 text-xs font-extrabold text-white hover:bg-red-600 transition"
+                          class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-red-500 text-white hover:bg-red-600 transition"
                         >
-                          <i class="fa-solid fa-trash mr-2"></i>
-                          Hapus
+                          <i class="fa-solid fa-trash text-sm"></i>
                         </button>
                       </form>
+
                     </div>
                   </td>
                 </tr>

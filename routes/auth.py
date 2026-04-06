@@ -1,6 +1,11 @@
 import os
 import uuid
 
+import calendar
+from models.varietas_padi import VarietasPadi
+from models.jadwal_tanam import JadwalTanam
+from models.varietas_padi import VarietasPadi
+from datetime import datetime, date, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from sqlalchemy import func, or_
 from models.user import User
@@ -144,16 +149,6 @@ def dashboard():
         total_sehat=total_sehat,
         total_penyakit=total_penyakit
     )
-
-
-# =======================
-# USER JADWAL
-# =======================
-@auth.route("/jadwal_user")
-@login_required
-def jadwal_user():
-    return render_template("jadwal_user.html", active="jadwal_user")
-
 
 # =======================
 # USER RIWAYAT
@@ -438,14 +433,272 @@ def penyakit():
     return render_template("data_penyakit.html", active="penyakit_admin")
 
 
-@auth.route("/admin/varietas")
+@auth.route('/admin/varietas')
 @login_required
 def varietas():
     if current_user.role != "admin":
         flash("Akses ditolak.", "error")
-        return redirect(url_for("deteksi"))
-    return render_template("varietas_padi.html", active="varietas_admin")
+        return redirect(url_for("auth.dashboard"))
 
+    varietas_list = VarietasPadi.query.order_by(VarietasPadi.nama.asc()).all()
+
+    return render_template(
+        "varietas_padi.html",
+        varietas_list=varietas_list,
+        active="varietas_admin"
+    )
+    
+@auth.route('/admin/varietas/tambah', methods=['GET', 'POST'])
+@login_required
+def tambah_varietas():
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    if request.method == 'POST':
+        nama = request.form.get('nama', '').strip()
+        hari_penyemaian = request.form.get('hari_penyemaian', type=int)
+        hari_penanaman = request.form.get('hari_penanaman', type=int)
+        hari_pemupukan_1 = request.form.get('hari_pemupukan_1', '').strip()
+        hari_pemupukan_2 = request.form.get('hari_pemupukan_2', '').strip()
+        hari_panen = request.form.get('hari_panen', type=int)
+
+        if not nama or hari_penyemaian is None or hari_penanaman is None or hari_panen is None:
+            flash("Nama, hari penyemaian, hari penanaman, dan hari panen wajib diisi.", "error")
+            return redirect(url_for('auth.tambah_varietas'))
+
+        cek = VarietasPadi.query.filter_by(nama=nama).first()
+        if cek:
+            flash("Varietas sudah ada.", "error")
+            return redirect(url_for('auth.tambah_varietas'))
+
+        data = VarietasPadi(
+            nama=nama,
+            hari_penyemaian=hari_penyemaian,
+            hari_penanaman=hari_penanaman,
+            hari_pemupukan_1=int(hari_pemupukan_1) if hari_pemupukan_1 else None,
+            hari_pemupukan_2=int(hari_pemupukan_2) if hari_pemupukan_2 else None,
+            hari_panen=hari_panen
+        )
+
+        db.session.add(data)
+        db.session.commit()
+
+        flash("Varietas berhasil ditambahkan.", "success")
+        return redirect(url_for('auth.varietas'))
+
+    return render_template(
+        'form_varietas.html',
+        title='Tambah Varietas',
+        form_action=url_for('auth.tambah_varietas'),
+        varietas=None,
+        active='varietas_admin'
+    )
+    
+@auth.route('/admin/varietas/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_varietas(id):
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    varietas = VarietasPadi.query.get_or_404(id)
+
+    if request.method == 'POST':
+        nama = request.form.get('nama', '').strip()
+        hari_penyemaian = request.form.get('hari_penyemaian', type=int)
+        hari_penanaman = request.form.get('hari_penanaman', type=int)
+        hari_pemupukan_1 = request.form.get('hari_pemupukan_1', '').strip()
+        hari_pemupukan_2 = request.form.get('hari_pemupukan_2', '').strip()
+        hari_panen = request.form.get('hari_panen', type=int)
+
+        if not nama or hari_penyemaian is None or hari_penanaman is None or hari_panen is None:
+            flash("Nama, hari penyemaian, hari penanaman, dan hari panen wajib diisi.", "error")
+            return redirect(url_for('auth.edit_varietas', id=id))
+
+        cek = VarietasPadi.query.filter(
+            VarietasPadi.nama == nama,
+            VarietasPadi.id != id
+        ).first()
+        if cek:
+            flash("Nama varietas sudah dipakai.", "error")
+            return redirect(url_for('auth.edit_varietas', id=id))
+
+        varietas.nama = nama
+        varietas.hari_penyemaian = hari_penyemaian
+        varietas.hari_penanaman = hari_penanaman
+        varietas.hari_pemupukan_1 = int(hari_pemupukan_1) if hari_pemupukan_1 else None
+        varietas.hari_pemupukan_2 = int(hari_pemupukan_2) if hari_pemupukan_2 else None
+        varietas.hari_panen = hari_panen
+
+        db.session.commit()
+
+        flash("Varietas berhasil diperbarui.", "success")
+        return redirect(url_for('auth.varietas'))
+
+    return render_template(
+        'form_varietas.html',
+        title='Edit Varietas',
+        form_action=url_for('auth.edit_varietas', id=id),
+        varietas=varietas,
+        active='varietas_admin'
+    )
+
+#delete
+@auth.route('/admin/varietas/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_varietas(id):
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    varietas = VarietasPadi.query.get_or_404(id)
+
+    dipakai = JadwalTanam.query.filter_by(varietas_id=id).first()
+    if dipakai:
+        flash("Varietas tidak bisa dihapus karena sudah dipakai user.", "error")
+        return redirect(url_for('auth.varietas'))
+
+    db.session.delete(varietas)
+    db.session.commit()
+
+    flash("Varietas berhasil dihapus.", "success")
+    return redirect(url_for('auth.varietas'))
+
+#jadwal tanam user
+@auth.route("/jadwal_user", methods=["GET", "POST"])
+@login_required
+def jadwal_user():
+    varietas_list = VarietasPadi.query.order_by(VarietasPadi.nama.asc()).all()
+    today = date.today()
+
+    jadwal = JadwalTanam.query.filter_by(user_id=current_user.id) \
+        .order_by(JadwalTanam.created_at.desc()) \
+        .first()
+
+    if request.method == "POST":
+        varietas_id = request.form.get("varietas_id", type=int)
+        tanggal_semai_str = request.form.get("tanggal_semai")
+
+        if not varietas_id or not tanggal_semai_str:
+            flash("Varietas padi dan tanggal semai wajib diisi.", "error")
+            return redirect(url_for("auth.jadwal_user"))
+
+        varietas = VarietasPadi.query.get(varietas_id)
+        if not varietas:
+            flash("Varietas tidak ditemukan.", "error")
+            return redirect(url_for("auth.jadwal_user"))
+
+        try:
+            tanggal_semai = datetime.strptime(tanggal_semai_str, "%Y-%m-%d").date()
+        except ValueError:
+            flash("Format tanggal semai tidak valid.", "error")
+            return redirect(url_for("auth.jadwal_user"))
+
+        tanggal_penyemaian = tanggal_semai + timedelta(days=varietas.hari_penyemaian)
+        tanggal_penanaman = tanggal_semai + timedelta(days=varietas.hari_penanaman)
+        tanggal_pemupukan_1 = (
+            tanggal_semai + timedelta(days=varietas.hari_pemupukan_1)
+            if varietas.hari_pemupukan_1 is not None else None
+        )
+        tanggal_pemupukan_2 = (
+            tanggal_semai + timedelta(days=varietas.hari_pemupukan_2)
+            if varietas.hari_pemupukan_2 is not None else None
+        )
+        tanggal_panen = tanggal_semai + timedelta(days=varietas.hari_panen)
+
+        jadwal_lama = JadwalTanam.query.filter_by(user_id=current_user.id).first()
+        if jadwal_lama:
+            db.session.delete(jadwal_lama)
+            db.session.flush()
+
+        jadwal_baru = JadwalTanam(
+            user_id=current_user.id,
+            varietas_id=varietas.id,
+            tanggal_semai=tanggal_semai,
+            tanggal_penyemaian=tanggal_penyemaian,
+            tanggal_penanaman=tanggal_penanaman,
+            tanggal_pemupukan_1=tanggal_pemupukan_1,
+            tanggal_pemupukan_2=tanggal_pemupukan_2,
+            tanggal_panen=tanggal_panen
+        )
+
+        db.session.add(jadwal_baru)
+        db.session.commit()
+
+        flash("Jadwal tanam berhasil dibuat.", "success")
+        return redirect(url_for("auth.jadwal_user"))
+
+    selected_varietas = jadwal.varietas if jadwal else None
+
+    steps = []
+    total_durasi = 0
+    waktu_berjalan = 0
+    sisa_waktu = 0
+    progress_percent = 0
+    calendar_days = []
+    current_month_label = today.strftime("%B %Y")
+
+    if jadwal:
+        total_durasi = (jadwal.tanggal_panen - jadwal.tanggal_semai).days
+        waktu_berjalan = max(0, min((today - jadwal.tanggal_semai).days, total_durasi))
+        sisa_waktu = max(0, (jadwal.tanggal_panen - today).days)
+
+        if total_durasi > 0:
+            progress_percent = min(100, max(0, (waktu_berjalan / total_durasi) * 100))
+
+        step_candidates = [
+            {"label": "Semai", "icon": "fa-seedling", "date": jadwal.tanggal_semai},
+            {"label": "Penyemaian", "icon": "fa-droplet", "date": jadwal.tanggal_penyemaian},
+            {"label": "Penanaman", "icon": "fa-hand-holding-droplet", "date": jadwal.tanggal_penanaman},
+            {"label": "Pemupukan 1", "icon": "fa-flask", "date": jadwal.tanggal_pemupukan_1},
+            {"label": "Pemupukan 2", "icon": "fa-flask", "date": jadwal.tanggal_pemupukan_2},
+            {"label": "Panen", "icon": "fa-wheat-awn", "date": jadwal.tanggal_panen},
+        ]
+
+        steps = [
+            {
+                "label": step["label"],
+                "icon": step["icon"],
+                "date": step["date"],
+                "done": step["date"] is not None and today >= step["date"],
+            }
+            for step in step_candidates if step["date"] is not None
+        ]
+
+        active_month = jadwal.tanggal_semai.month
+        active_year = jadwal.tanggal_semai.year
+        current_month_label = jadwal.tanggal_semai.strftime("%B %Y")
+
+        important_dates = set()
+        for step in steps:
+            if step["date"] and step["date"].month == active_month and step["date"].year == active_year:
+                important_dates.add(step["date"])
+
+        cal = calendar.Calendar(firstweekday=6)
+        for day in cal.itermonthdates(active_year, active_month):
+            calendar_days.append({
+                "day": day.day,
+                "in_month": day.month == active_month,
+                "is_today": day == today,
+                "is_event": day in important_dates
+            })
+
+    return render_template(
+        "jadwal_user.html",
+        active="jadwal_user",
+        varietas_list=varietas_list,
+        jadwal=jadwal,
+        selected_varietas=selected_varietas,
+        steps=steps,
+        total_durasi=total_durasi,
+        waktu_berjalan=waktu_berjalan,
+        sisa_waktu=sisa_waktu,
+        progress_percent=progress_percent,
+        calendar_days=calendar_days,
+        current_month_label=current_month_label,
+        today=today
+    )
 
 # =======================
 # USER PROFILE
