@@ -36,7 +36,7 @@ def index():
     if current_user.is_authenticated:
         if current_user.role == "admin":
             return redirect(url_for("auth.admin_dashboard"))
-        return redirect(url_for("deteksi"))
+        return redirect(url_for("auth.dashboard"))
     return redirect(url_for("auth.login"))
 
 
@@ -48,7 +48,7 @@ def login():
     if current_user.is_authenticated:
         if current_user.role == "admin":
             return redirect(url_for("auth.admin_dashboard"))
-        return redirect(url_for("deteksi"))
+        return redirect(url_for("auth.dashboard"))
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -77,7 +77,7 @@ def login():
 
         if user.role == "admin":
             return redirect(url_for("auth.admin_dashboard"))
-        return redirect(url_for("deteksi"))
+        return redirect(url_for("auth.dashboard"))
 
     return render_template("login.html")
 
@@ -130,9 +130,41 @@ def register():
 # =======================
 # USER DASHBOARD
 # =======================
+
+def get_countdown_jadwal(jadwal):
+    today = date.today()
+
+    if not jadwal:
+        return None
+
+    tahapan = [
+        ("Semai", jadwal.tanggal_semai),
+        ("Penyemaian", jadwal.tanggal_penyemaian),
+        ("Penanaman", jadwal.tanggal_penanaman),
+        ("Pemupukan 1", jadwal.tanggal_pemupukan_1),
+        ("Pemupukan 2", jadwal.tanggal_pemupukan_2),
+        ("Panen", jadwal.tanggal_panen),
+    ]
+
+    for nama, tgl in tahapan:
+        if tgl and tgl >= today:
+            selisih = (tgl - today).days
+
+            if selisih == 0:
+                return f"Hari ini {nama}"
+            elif selisih == 1:
+                return f"Besok {nama}"
+            else:
+                return f"{selisih} hari menuju {nama}"
+
+    return "Semua tahapan selesai"
+
 @auth.route("/dashboard")
 @login_required
 def dashboard():
+    # =========================
+    # RIWAYAT DETEKSI
+    # =========================
     histories = RiwayatDeteksi.query.filter_by(user_id=current_user.id) \
         .order_by(RiwayatDeteksi.created_at.desc()) \
         .all()
@@ -141,13 +173,45 @@ def dashboard():
     total_sehat = len([h for h in histories if h.hasil == "Healthy Rice Leaf"])
     total_penyakit = total_deteksi - total_sehat
 
+    # =========================
+    # JADWAL TANAM
+    # =========================
+    jadwal = JadwalTanam.query.filter_by(user_id=current_user.id) \
+        .order_by(JadwalTanam.created_at.desc()) \
+        .first()
+
+    # =========================
+    # COUNTDOWN
+    # =========================
+    countdown = None
+    if jadwal:
+        countdown = get_countdown_jadwal(jadwal)
+
+    # =========================
+    # PROGRESS BAR (🔥 INI YANG BARU)
+    # =========================
+    progress_percent = 0
+
+    if jadwal:
+        total_hari = (jadwal.tanggal_panen - jadwal.tanggal_semai).days
+        hari_berjalan = (date.today() - jadwal.tanggal_semai).days
+
+        if total_hari > 0:
+            progress_percent = max(0, min(100, int((hari_berjalan / total_hari) * 100)))
+
+    # =========================
+    # RENDER
+    # =========================
     return render_template(
         "beranda_user.html",
         active="beranda_user",
         histories=histories[:5],
         total_deteksi=total_deteksi,
         total_sehat=total_sehat,
-        total_penyakit=total_penyakit
+        total_penyakit=total_penyakit,
+        jadwal=jadwal,
+        countdown=countdown,
+        progress_percent=progress_percent   # 🔥 WAJIB ADA
     )
 
 # =======================

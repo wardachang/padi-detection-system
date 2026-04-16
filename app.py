@@ -41,15 +41,21 @@ migrate = Migrate(app, db)
 # =======================
 # LOAD MODEL CNN
 # =======================
-model = load_model("model/model_resnet_padi2.h5", compile=False)
+model_padi = load_model("model/baru_model_resnet_rice_leaf.h5", compile=False)
 
 class_names = [
-    "Bacterial Leaf Blight",
-    "Brown Spot",
-    "Healthy Rice Leaf",
-    "Leaf Blast"
+    "Bacterialblight",  # 0
+    "Blast",            # 1
+    "Brownspot",        # 2
+    "healthy"           # 3
 ]
 
+class_names_display = {
+    "Bacterialblight": "Bacterial Leaf Blight",
+    "Blast": "Leaf Blast",
+    "Brownspot": "Brown Spot",
+    "healthy": "Healthy Rice Leaf"
+}
 
 # =======================
 # PREPROCESS IMAGE
@@ -57,26 +63,26 @@ class_names = [
 def prepare_image(img_path):
     img = image.load_img(img_path, target_size=(224, 224))
     img_array = image.img_to_array(img)
+    
     img_array = np.expand_dims(img_array, axis=0)
     img_array = preprocess_input(img_array)
+    
     return img_array
 
-
 # =======================
-# PREDICT IMAGE
+# PREDICT IMAGE (FINAL TANPA FILTER)
 # =======================
 def predict_disease(img_path):
     img = prepare_image(img_path)
-    pred = model.predict(img, verbose=0)[0]
 
-    print("Raw prediction:", pred)
+    pred = model_padi.predict(img, verbose=0)[0]
 
     idx = int(np.argmax(pred))
-    prediction = class_names[idx]
+    prediction_raw = class_names[idx]
+    prediction = class_names_display[prediction_raw]
     confidence = float(pred[idx]) * 100
 
     return prediction, confidence, pred
-
 
 # =======================
 # LOGIN MANAGER
@@ -159,14 +165,18 @@ def deteksi():
                 try:
                     prediction, confidence, raw_pred = predict_disease(file_path)
 
-                    info = disease_info.get(prediction)
-                    if info:
-                        desc = info.get("desc")
-                        solution = info.get("solution", [])
+                    if prediction == "Bukan Padi":
+                            desc = "Gambar yang Anda upload bukan daun padi."
+                            solution = ["Silakan upload gambar daun padi yang jelas."]
                     else:
-                        desc = "Informasi penyakit belum tersedia."
-                        solution = []
-
+                            info = disease_info.get(prediction)
+                            if info:
+                                desc = info.get("desc")
+                                solution = info.get("solution", [])
+                            else:
+                                desc = "Informasi penyakit belum tersedia."
+                                solution = []
+                                
                     # =======================
                     # SIMPAN KE DATABASE
                     # =======================
