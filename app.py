@@ -41,7 +41,11 @@ migrate = Migrate(app, db)
 # =======================
 # LOAD MODEL CNN
 # =======================
+
+model_filter = load_model("model/model_resnet_final.h5", compile=False)
 model_padi = load_model("model/baru_model_resnet_rice_leaf.h5", compile=False)
+
+class_names_filter = ["BUKAN PADI", "PADI"]
 
 class_names = [
     "Bacterialblight",  # 0
@@ -60,19 +64,52 @@ class_names_display = {
 # =======================
 # PREPROCESS IMAGE
 # =======================
+
+# Untuk model filter padi / non_padi
+def prepare_image_filter(img_path):
+    img = image.load_img(img_path, target_size=(224, 224))
+    img_array = image.img_to_array(img)
+
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = preprocess_input(img_array)
+
+    return img_array
+
+
+# Untuk model penyakit padi 4 kelas
 def prepare_image(img_path):
     img = image.load_img(img_path, target_size=(224, 224))
     img_array = image.img_to_array(img)
-    
+
     img_array = np.expand_dims(img_array, axis=0)
     img_array = preprocess_input(img_array)
-    
+
     return img_array
 
+
 # =======================
-# PREDICT IMAGE (FINAL TANPA FILTER)
+# PREDICT IMAGE (PAKAI FILTER)
 # =======================
 def predict_disease(img_path):
+    img_filter = prepare_image_filter(img_path)
+
+    pred_filter = model_filter.predict(img_filter, verbose=0)[0]
+
+    idx_filter = int(np.argmax(pred_filter))
+    filter_label = class_names_filter[idx_filter]
+    filter_confidence = float(pred_filter[idx_filter]) * 100
+
+    print("Filter prediction:", pred_filter)
+    print("Filter label:", filter_label)
+    print("Filter confidence:", round(filter_confidence, 2), "%")
+
+    if filter_label == "BUKAN PADI":
+        return "Bukan Padi", filter_confidence, pred_filter
+
+    # =======================
+    # STEP 2: DETEKSI PENYAKIT PADI
+    # =======================
+
     img = prepare_image(img_path)
 
     pred = model_padi.predict(img, verbose=0)[0]
@@ -82,8 +119,12 @@ def predict_disease(img_path):
     prediction = class_names_display[prediction_raw]
     confidence = float(pred[idx]) * 100
 
-    return prediction, confidence, pred
+    print("Disease prediction:", pred)
+    print("Disease label:", prediction)
+    print("Disease confidence:", round(confidence, 2), "%")
 
+    return prediction, confidence, pred
+   
 # =======================
 # LOGIN MANAGER
 # =======================
@@ -206,4 +247,4 @@ def deteksi():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

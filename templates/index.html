@@ -190,7 +190,6 @@
 
           <!-- KANAN -->
           <aside class="space-y-6">
-            <!-- PREVIEW -->
             <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
               <div class="px-6 py-4 border-b border-slate-100">
                 <div class="text-[11px] font-extrabold tracking-widest text-slate-500">PRATINJAU GAMBAR</div>
@@ -213,7 +212,6 @@
               </div>
             </div>
 
-            <!-- TIPS -->
             <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
               <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
                 <i class="fa-solid fa-lightbulb text-emerald-600"></i>
@@ -242,7 +240,7 @@
   </div>
 
   <!-- MODAL KAMERA -->
-  <div id="cameraModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+  <div id="cameraModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 pointer-events-none">
     <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
       <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
         <h3 class="font-extrabold text-slate-900">Ambil Foto dari Kamera</h3>
@@ -320,6 +318,13 @@
         "bg-emerald-500 text-white shadow-sm hover:brightness-95 active:scale-[0.99] transition";
     }
 
+    function resetDetectButton() {
+      detectBtn.disabled = true;
+      detectBtn.className =
+        "w-full rounded-2xl px-6 py-4 font-extrabold flex items-center justify-center gap-2 " +
+        "bg-slate-100 text-slate-400 cursor-not-allowed";
+    }
+
     function updatePreview(src) {
       previewImg.src = src;
       previewImg.classList.remove("hidden");
@@ -369,13 +374,14 @@
         });
 
         video.srcObject = cameraStream;
-        cameraModal.classList.remove("hidden");
+        video.classList.remove("hidden");
+
+        cameraModal.classList.remove("hidden", "pointer-events-none");
         cameraModal.classList.add("flex");
 
         captureBtn.classList.remove("hidden");
         retakeBtn.classList.add("hidden");
         usePhotoBtn.classList.add("hidden");
-        video.classList.remove("hidden");
       } catch (error) {
         alert("Kamera tidak dapat diakses. Pastikan browser sudah diberi izin kamera.");
         console.error(error);
@@ -392,12 +398,14 @@
 
     function closeCameraModal() {
       stopCamera();
-      cameraModal.classList.add("hidden");
+      cameraModal.classList.add("hidden", "pointer-events-none");
       cameraModal.classList.remove("flex");
+
       capturedBlob = null;
       captureBtn.classList.remove("hidden");
       retakeBtn.classList.add("hidden");
       usePhotoBtn.classList.add("hidden");
+      video.classList.remove("hidden");
     }
 
     openCameraBtn.addEventListener("click", async (e) => {
@@ -439,13 +447,10 @@
 
         capturedBlob = blob;
 
-        const tempUrl = URL.createObjectURL(blob);
-        video.classList.add("hidden");
-        previewImg.src = tempUrl;
-
         captureBtn.classList.add("hidden");
         retakeBtn.classList.remove("hidden");
         usePhotoBtn.classList.remove("hidden");
+        video.classList.add("hidden");
       }, "image/jpeg", 0.95);
     });
 
@@ -476,10 +481,16 @@
 
     window.addEventListener("beforeunload", stopCamera);
 
+    window.addEventListener("pageshow", () => {
+      closeCameraModal();
+    });
+
     {% if img_path %}
       previewImg.classList.remove("hidden");
       emptyPreview.classList.add("hidden");
       enableDetectButton();
+    {% else %}
+      resetDetectButton();
     {% endif %}
   </script>
 </body>
