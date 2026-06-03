@@ -730,6 +730,27 @@ def jadwal_user():
     )
 
 # =======================
+# HAPUS JADWAL TANAM USER
+# =======================
+@auth.route("/jadwal_user/hapus/<int:id>", methods=["POST"])
+@login_required
+def hapus_jadwal_user(id):
+    jadwal = JadwalTanam.query.filter_by(
+        id=id,
+        user_id=current_user.id
+    ).first()
+
+    if not jadwal:
+        flash("Jadwal tanam tidak ditemukan atau bukan milik Anda.", "error")
+        return redirect(url_for("auth.jadwal_user"))
+
+    db.session.delete(jadwal)
+    db.session.commit()
+
+    flash("Jadwal tanam berhasil dihapus.", "success")
+    return redirect(url_for("auth.jadwal_user"))
+
+# =======================
 # USER PROFILE
 # =======================
 @auth.route("/profile", methods=["GET", "POST"])

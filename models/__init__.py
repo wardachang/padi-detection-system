@@ -4,7 +4,9 @@ from .penyakit import Penyakit
 from .foto_hasil_penyakit import FotoHasilPenyakit
 from .penanganan_penyakit import PenangananPenyakit
 from .varietas_padi import VarietasPadi
-from .jadwal_pengelolaan import JadwalPengelolaan
 from .hasil_deteksi import HasilDeteksi
-from .jadwal_varietas import JadwalVarietas
-from .jadwal_user import JadwalUser
+
+# Model lama / tidak dipakai
+# from .jadwal_pengelolaan_bak import JadwalPengelolaan
+# from .jadwal_varietas_bak import JadwalVarietas
+# from .jadwal_user_bak import JadwalUser
