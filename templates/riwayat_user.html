@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rice Health System - Riwayat</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body { 
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
+    }
+
+    /* ── OVERLAY ── */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 40;
+    }
+
+    #sidebar-overlay.active { 
+      display: block; 
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      position: fixed;
+      top: 0; 
+      left: 0; 
+      bottom: 0;
+      width: 260px;
+      z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      background: #fff;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #sidebar.open { 
+      transform: translateX(0); 
+    }
+
+    @media (min-width: 1024px) {
+    #sidebar {
+      position: sticky;
+      top: 0;
+      transform: translateX(0) !important;
+      flex-shrink: 0;
+      height: 100vh;
+      left: auto;
+      bottom: auto;
+      overflow: hidden;
+    }
+
+      #sidebar-overlay { 
+        display: none !important; 
+      }
+
+      #mobile-menu-btn { 
+        display: none !important; 
+      }
+    }
+  </style>
+</head>
+
+<body class="h-screen overflow-hidden bg-[#F3F6F3] text-slate-900">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Overlay mobile -->
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+      {% include 'sidebar_user.html' %}
+    </div>
+
+    <main class="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto">
+
+      <!-- Top Header mobile -->
+      <div class="sticky top-0 z-30 h-14 bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 gap-3 lg:hidden">
+        <button
+          id="mobile-menu-btn"
+          onclick="openSidebar()"
+          class="p-2 rounded-lg hover:bg-slate-100 transition"
+          aria-label="Buka menu"
+        >
+          <i class="fa-solid fa-bars text-slate-600 text-lg"></i>
+        </button>
+        <div class="font-extrabold text-sm truncate">Riwayat Deteksi</div>
+      </div>
+
+      <div class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 md:px-8 py-5 sm:py-8">
+
+        <!-- Header -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+              Riwayat Deteksi
+            </h1>
+            <p class="text-slate-600 max-w-2xl mt-1 text-sm">
+              Tinjau hasil deteksi penyakit daun padi yang pernah Anda lakukan sebelumnya.
+            </p>
+          </div>
+
+          <form 
+            action="{{ url_for('auth.hapus_semua_riwayat') }}" 
+            method="POST"
+            class="shrink-0 delete-form"
+            data-confirm-title="Hapus Semua Riwayat?"
+            data-confirm-message="Semua data riwayat deteksi akan dihapus permanen. Tindakan ini tidak dapat dibatalkan."
+          >
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-red-600 transition w-full sm:w-auto justify-center"
+            >
+              <i class="fa-solid fa-trash-can"></i>
+              Hapus Semua
+            </button>
+          </form>
+        </div>
+
+        <!-- Toast Flash Message Tengah -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div 
+              id="toastContainer" 
+              class="fixed inset-x-0 top-1/2 -translate-y-1/2 z-[90] flex justify-center px-4 pointer-events-none transition-all duration-500"
+            >
+              {% for category, message in messages %}
+                <div
+                  class="toast-message pointer-events-auto max-w-md w-full rounded-2xl px-5 py-4 text-sm font-bold shadow-2xl border flex items-center gap-3
+                  {% if category == 'success' %}
+                    bg-emerald-50 text-emerald-700 border-emerald-200
+                  {% else %}
+                    bg-red-50 text-red-700 border-red-200
+                  {% endif %}"
+                >
+                  {% if category == 'success' %}
+                    <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
+                  {% else %}
+                    <i class="fa-solid fa-circle-exclamation text-red-500 text-xl"></i>
+                  {% endif %}
+                  <span>{{ message }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Stats -->
+        <div class="mt-5 grid grid-cols-3 gap-3 sm:gap-4">
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3 sm:p-5">
+            <div class="text-[10px] sm:text-xs font-semibold text-slate-500">Total Deteksi</div>
+            <div class="mt-2 text-xl sm:text-2xl font-extrabold">{{ histories|length }}</div>
+            <div class="text-[10px] sm:text-xs font-extrabold text-emerald-600">Data tersimpan</div>
+          </div>
+
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3 sm:p-5">
+            <div class="text-[10px] sm:text-xs font-semibold text-slate-500">Terdeteksi</div>
+            <div class="mt-2 text-xl sm:text-2xl font-extrabold">
+              {{ histories | selectattr('hasil', 'ne', 'Healthy Rice Leaf') | list | length }}
+            </div>
+            <div class="text-[10px] sm:text-xs font-extrabold text-orange-500">Perlu perhatian</div>
+          </div>
+
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3 sm:p-5">
+            <div class="text-[10px] sm:text-xs font-semibold text-slate-500">Avg Confidence</div>
+            <div class="mt-2 text-xl sm:text-2xl font-extrabold">
+              {% if histories|length > 0 %}
+                {{ "%.1f"|format((histories | map(attribute='confidence') | sum) / (histories|length)) }}%
+              {% else %}
+                0.0%
+              {% endif %}
+            </div>
+            <div class="text-[10px] sm:text-xs font-extrabold text-emerald-600">Model CNN</div>
+          </div>
+        </div>
+
+        <!-- Info Bar -->
+        <div class="mt-4 rounded-2xl bg-white border border-slate-200 shadow-sm p-3 sm:p-4">
+          <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-500">
+            <i class="fa-solid fa-clock-rotate-left text-slate-400 shrink-0"></i>
+            <span>Data riwayat deteksi tersimpan otomatis setiap selesai prediksi</span>
+          </div>
+        </div>
+
+        <!-- Tabel desktop -->
+        <div class="mt-4 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden hidden md:block">
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead class="bg-slate-50">
+                <tr class="text-left text-[11px] font-extrabold tracking-widest text-slate-500">
+                  <th class="px-6 py-4">PRATINJAU</th>
+                  <th class="px-6 py-4">INFO DETEKSI</th>
+                  <th class="px-6 py-4">STATUS</th>
+                  <th class="px-6 py-4">KEPERCAYAAN CNN</th>
+                  <th class="px-6 py-4 text-right">AKSI</th>
+                </tr>
+              </thead>
+
+              <tbody class="divide-y divide-slate-100">
+                {% if histories %}
+                  {% for item in histories %}
+                    <tr class="history-row bg-white hover:bg-slate-50 transition">
+                      <td class="px-6 py-4">
+                        <img
+                          class="h-14 w-14 rounded-xl object-cover border border-slate-200"
+                          src="{{ item.image_path }}"
+                          alt="preview"
+                        >
+                      </td>
+
+                      <td class="px-6 py-4">
+                        <div class="text-sm font-extrabold text-slate-900">{{ item.hasil }}</div>
+                        <div class="text-xs text-slate-500">
+                          {{ item.created_at.strftime('%d %b %Y • %H:%M') }}
+                        </div>
+                      </td>
+
+                      <td class="px-6 py-4">
+                        {% if item.hasil == 'Healthy Rice Leaf' %}
+                          <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
+                            Sehat
+                          </span>
+                        {% elif item.hasil == 'Brown Spot' %}
+                          <span class="inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-xs font-extrabold text-orange-700">
+                            Brown Spot
+                          </span>
+                        {% elif item.hasil == 'Leaf Blast' %}
+                          <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-extrabold text-red-600">
+                            Leaf Blast
+                          </span>
+                        {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                          <span class="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-xs font-extrabold text-yellow-700">
+                            BLB
+                          </span>
+                        {% else %}
+                          <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">
+                            {{ item.hasil }}
+                          </span>
+                        {% endif %}
+                      </td>
+
+                      <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                          <div class="h-2 w-32 lg:w-48 rounded-full bg-slate-100 overflow-hidden">
+                            {% if item.hasil == 'Healthy Rice Leaf' %}
+                              <div class="h-full bg-emerald-500" style="width: {{ item.confidence }}%;"></div>
+                            {% elif item.hasil == 'Brown Spot' %}
+                              <div class="h-full bg-orange-500" style="width: {{ item.confidence }}%;"></div>
+                            {% elif item.hasil == 'Leaf Blast' %}
+                              <div class="h-full bg-red-500" style="width: {{ item.confidence }}%;"></div>
+                            {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                              <div class="h-full bg-yellow-500" style="width: {{ item.confidence }}%;"></div>
+                            {% else %}
+                              <div class="h-full bg-slate-500" style="width: {{ item.confidence }}%;"></div>
+                            {% endif %}
+                          </div>
+                          <div class="text-xs font-extrabold text-slate-700">
+                            {{ "%.1f"|format(item.confidence) }}%
+                          </div>
+                        </div>
+                      </td>
+
+                      <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end gap-4">
+                          <button
+                            type="button"
+                            class="text-sm font-extrabold text-emerald-600 hover:underline"
+                            onclick="openDetailModal(
+                              '{{ item.image_path }}',
+                              '{{ item.hasil|escape }}',
+                              '{{ '%.2f'|format(item.confidence) }}',
+                              `{{ (item.deskripsi or '-')|replace('`', '\\`') }}`
+                            )"
+                          >
+                            Lihat Detail
+                          </button>
+
+                          <form 
+                            action="{{ url_for('auth.hapus_riwayat', id=item.id) }}" 
+                            method="POST"
+                            class="delete-form"
+                            data-confirm-title="Hapus Riwayat?"
+                            data-confirm-message="Data riwayat deteksi ini akan dihapus permanen."
+                          >
+                            <button type="submit" class="text-sm font-extrabold text-red-600 hover:underline">
+                              Hapus
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="px-6 py-10 text-center text-slate-500">
+                      Belum ada riwayat deteksi.
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="px-6 py-4 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div id="desktopPaginationInfo" class="text-xs text-slate-500">
+              Menampilkan {{ histories|length }} data riwayat deteksi
+            </div>
+
+            <div id="desktopPagination" class="flex items-center gap-2 flex-wrap justify-end"></div>
+          </div>
+        </div>
+
+        <!-- Card list mobile -->
+        <div class="mt-4 space-y-3 md:hidden">
+          {% if histories %}
+            {% for item in histories %}
+              <div class="history-card rounded-2xl bg-white border border-slate-200 shadow-sm p-4 flex gap-4">
+                <img
+                  class="h-16 w-16 rounded-xl object-cover border border-slate-200 shrink-0"
+                  src="{{ item.image_path }}"
+                  alt="preview"
+                >
+
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="text-sm font-extrabold text-slate-900 truncate">{{ item.hasil }}</div>
+
+                    {% if item.hasil == 'Healthy Rice Leaf' %}
+                      <span class="shrink-0 inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
+                        Sehat
+                      </span>
+                    {% elif item.hasil == 'Brown Spot' %}
+                      <span class="shrink-0 inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-extrabold text-orange-700">
+                        Brown Spot
+                      </span>
+                    {% elif item.hasil == 'Leaf Blast' %}
+                      <span class="shrink-0 inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-extrabold text-red-600">
+                        Leaf Blast
+                      </span>
+                    {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                      <span class="shrink-0 inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-extrabold text-yellow-700">
+                        BLB
+                      </span>
+                    {% else %}
+                      <span class="shrink-0 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-extrabold text-slate-700">
+                        {{ item.hasil }}
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  <div class="mt-1 text-[11px] text-slate-500">
+                    {{ item.created_at.strftime('%d %b %Y • %H:%M') }}
+                  </div>
+
+                  <div class="mt-2 flex items-center gap-2">
+                    <div class="h-1.5 flex-1 rounded-full bg-slate-100 overflow-hidden">
+                      {% if item.hasil == 'Healthy Rice Leaf' %}
+                        <div class="h-full bg-emerald-500" style="width: {{ item.confidence }}%;"></div>
+                      {% elif item.hasil == 'Brown Spot' %}
+                        <div class="h-full bg-orange-500" style="width: {{ item.confidence }}%;"></div>
+                      {% elif item.hasil == 'Leaf Blast' %}
+                        <div class="h-full bg-red-500" style="width: {{ item.confidence }}%;"></div>
+                      {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                        <div class="h-full bg-yellow-500" style="width: {{ item.confidence }}%;"></div>
+                      {% else %}
+                        <div class="h-full bg-slate-500" style="width: {{ item.confidence }}%;"></div>
+                      {% endif %}
+                    </div>
+
+                    <span class="text-[11px] font-extrabold text-slate-600 shrink-0">
+                      {{ "%.1f"|format(item.confidence) }}%
+                    </span>
+                  </div>
+
+                  <div class="mt-3 flex items-center gap-4">
+                    <button
+                      type="button"
+                      class="text-xs font-extrabold text-emerald-600 hover:underline"
+                      onclick="openDetailModal(
+                        '{{ item.image_path }}',
+                        '{{ item.hasil|escape }}',
+                        '{{ '%.2f'|format(item.confidence) }}',
+                        `{{ (item.deskripsi or '-')|replace('`', '\\`') }}`
+                      )"
+                    >
+                      <i class="fa-solid fa-eye mr-1"></i>Lihat Detail
+                    </button>
+
+                    <form 
+                      action="{{ url_for('auth.hapus_riwayat', id=item.id) }}" 
+                      method="POST"
+                      class="delete-form"
+                      data-confirm-title="Hapus Riwayat?"
+                      data-confirm-message="Data riwayat deteksi ini akan dihapus permanen."
+                    >
+                      <button type="submit" class="text-xs font-extrabold text-red-500 hover:underline">
+                        <i class="fa-solid fa-trash mr-1"></i>Hapus
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+
+            <div class="pt-2 space-y-3">
+              <div id="mobilePaginationInfo" class="text-xs text-slate-500 text-center">
+                Menampilkan {{ histories|length }} data riwayat deteksi
+              </div>
+
+              <div id="mobilePagination" class="flex items-center justify-center gap-2 flex-wrap"></div>
+            </div>
+          {% else %}
+            <div class="rounded-2xl bg-white border border-dashed border-slate-200 p-8 text-center text-slate-500 text-sm">
+              Belum ada riwayat deteksi.
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Detail -->
+  <div id="detailModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
+      <div class="px-4 sm:px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
+        <h3 class="font-extrabold text-slate-900 text-sm sm:text-base">Detail Riwayat Deteksi</h3>
+        <button onclick="closeDetailModal()" class="text-slate-500 hover:text-slate-700 text-xl p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 p-4 sm:p-6">
+        <div>
+          <img id="modalImage" src="" alt="Preview" class="w-full h-56 sm:h-72 object-cover rounded-2xl border border-slate-200">
+        </div>
+
+        <div>
+          <div class="text-xs font-extrabold tracking-widest text-emerald-600">HASIL DETEKSI</div>
+          <h2 id="modalResult" class="mt-2 text-xl sm:text-2xl font-extrabold text-slate-900"></h2>
+
+          <div class="mt-4 text-sm font-bold text-slate-700">
+            Confidence: <span id="modalConfidence"></span>%
+          </div>
+
+          <div class="mt-6">
+            <div class="font-extrabold text-slate-800 text-sm">Deskripsi</div>
+            <p id="modalDescription" class="mt-2 text-slate-600 leading-7 text-sm"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Hapus -->
+  <div id="confirmModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[95] p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+      <div class="p-6 text-center">
+        <div class="mx-auto h-14 w-14 rounded-full bg-red-100 flex items-center justify-center">
+          <i class="fa-solid fa-trash-can text-red-500 text-2xl"></i>
+        </div>
+
+        <h3 id="confirmTitle" class="mt-4 text-xl font-extrabold text-slate-900">
+          Hapus Riwayat?
+        </h3>
+
+        <p id="confirmMessage" class="mt-2 text-sm leading-6 text-slate-500">
+          Data riwayat akan dihapus permanen.
+        </p>
+
+        <div class="mt-6 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onclick="closeConfirmModal()"
+            class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-600 hover:bg-slate-50 transition"
+          >
+            Batal
+          </button>
+
+          <button
+            type="button"
+            onclick="submitDeleteForm()"
+            class="rounded-xl bg-red-500 px-4 py-3 text-sm font-extrabold text-white hover:bg-red-600 transition"
+          >
+            Ya, Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('sidebar-overlay').classList.add('active');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('active');
+    }
+
+    function openDetailModal(image, result, confidence, description) {
+      document.getElementById("modalImage").src = image;
+      document.getElementById("modalResult").textContent = result;
+      document.getElementById("modalConfidence").textContent = confidence;
+      document.getElementById("modalDescription").textContent = description || "-";
+
+      const modal = document.getElementById("detailModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeDetailModal() {
+      const modal = document.getElementById("detailModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    document.getElementById("detailModal").addEventListener("click", function (e) {
+      if (e.target === this) closeDetailModal();
+    });
+
+    // =========================
+    // TOAST AUTO HILANG
+    // =========================
+    document.addEventListener("DOMContentLoaded", function () {
+      const toastContainer = document.getElementById("toastContainer");
+
+      if (toastContainer) {
+        setTimeout(function () {
+          toastContainer.classList.add("opacity-0", "scale-95");
+
+          setTimeout(function () {
+            toastContainer.remove();
+          }, 500);
+        }, 3000);
+      }
+    });
+
+    // =========================
+    // MODAL KONFIRMASI HAPUS
+    // =========================
+    let pendingDeleteForm = null;
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const deleteForms = document.querySelectorAll(".delete-form");
+
+      deleteForms.forEach(function (form) {
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          pendingDeleteForm = form;
+
+          const title = form.getAttribute("data-confirm-title") || "Hapus Riwayat?";
+          const message = form.getAttribute("data-confirm-message") || "Data akan dihapus permanen.";
+
+          openConfirmModal(title, message);
+        });
+      });
+    });
+
+    function openConfirmModal(title, message) {
+      document.getElementById("confirmTitle").textContent = title;
+      document.getElementById("confirmMessage").textContent = message;
+
+      const modal = document.getElementById("confirmModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeConfirmModal() {
+      const modal = document.getElementById("confirmModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+
+      pendingDeleteForm = null;
+    }
+
+    function submitDeleteForm() {
+      if (pendingDeleteForm) {
+        pendingDeleteForm.submit();
+      }
+    }
+
+    document.getElementById("confirmModal").addEventListener("click", function (e) {
+      if (e.target === this) closeConfirmModal();
+    });
+
+    // =========================
+    // PAGINATION RIWAYAT
+    // =========================
+    document.addEventListener("DOMContentLoaded", function () {
+      const rows = Array.from(document.querySelectorAll(".history-row"));
+      const cards = Array.from(document.querySelectorAll(".history-card"));
+
+      const desktopPagination = document.getElementById("desktopPagination");
+      const mobilePagination = document.getElementById("mobilePagination");
+      const desktopInfo = document.getElementById("desktopPaginationInfo");
+      const mobileInfo = document.getElementById("mobilePaginationInfo");
+
+      const totalItems = Math.max(rows.length, cards.length);
+      const perPage = 5;
+      const totalPages = Math.ceil(totalItems / perPage);
+
+      let currentPage = 1;
+
+      if (totalItems === 0) return;
+
+      function renderPagination() {
+        const startIndex = (currentPage - 1) * perPage;
+        const endIndex = startIndex + perPage;
+
+        rows.forEach(function (row, index) {
+          row.style.display = index >= startIndex && index < endIndex ? "table-row" : "none";
+        });
+
+        cards.forEach(function (card, index) {
+          card.style.display = index >= startIndex && index < endIndex ? "flex" : "none";
+        });
+
+        const startText = startIndex + 1;
+        const endText = Math.min(endIndex, totalItems);
+        const infoText = `Menampilkan ${startText}-${endText} dari ${totalItems} data riwayat deteksi`;
+
+        if (desktopInfo) desktopInfo.textContent = infoText;
+        if (mobileInfo) mobileInfo.textContent = infoText;
+
+        buildButtons(desktopPagination);
+        buildButtons(mobilePagination);
+      }
+
+      function buildButtons(container) {
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        const prevBtn = createPageButton("‹", currentPage === 1, function () {
+          if (currentPage > 1) {
+            currentPage--;
+            renderPagination();
+          }
+        });
+
+        container.appendChild(prevBtn);
+
+        for (let i = 1; i <= totalPages; i++) {
+          const pageBtn = createPageButton(i, false, function () {
+            currentPage = i;
+            renderPagination();
+          });
+
+          if (i === currentPage) {
+            pageBtn.className = "h-9 min-w-9 px-3 rounded-lg bg-emerald-500 text-white text-sm font-extrabold shadow-sm";
+          }
+
+          container.appendChild(pageBtn);
+        }
+
+        const nextBtn = createPageButton("›", currentPage === totalPages, function () {
+          if (currentPage < totalPages) {
+            currentPage++;
+            renderPagination();
+          }
+        });
+
+        container.appendChild(nextBtn);
+      }
+
+      function createPageButton(label, disabled, onClick) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.disabled = disabled;
+
+        button.className = disabled
+          ? "h-9 min-w-9 px-3 rounded-lg bg-slate-100 text-slate-400 text-sm font-extrabold cursor-not-allowed"
+          : "h-9 min-w-9 px-3 rounded-lg bg-white border border-slate-200 text-slate-600 text-sm font-extrabold hover:bg-emerald-50 hover:text-emerald-600 transition";
+
+        button.addEventListener("click", onClick);
+
+        return button;
+      }
+
+      renderPagination();
+    });
+  </script>
+</body>
+</html>

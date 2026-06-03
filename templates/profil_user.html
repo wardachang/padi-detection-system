@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profil Saya - Rice Health System</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body { font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+
+    /* ── Mobile sidebar overlay ── */
+    #sidebarOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 40;
+    }
+    #sidebarOverlay.active { display: block; }
+
+    /* ── Mobile sidebar drawer ── */
+    #mobileSidebar {
+      position: fixed;
+      inset-block: 0;
+      left: 0;
+      width: 260px;
+      z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+    }
+    #mobileSidebar.open { transform: translateX(0); }
+
+    /* ── Desktop sidebar ── */
+    #desktopSidebar {
+      width: 260px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-[#F3F6F3] text-slate-900">
+<div class="min-h-screen flex">
+
+  <!-- ════════════════════════════════════
+       DESKTOP SIDEBAR  (hidden on mobile)
+       ════════════════════════════════════ -->
+  <div id="desktopSidebar" class="hidden sm:flex flex-col sticky top-0 h-screen bg-white border-r border-slate-200 shadow-sm">
+    {% include 'sidebar_user.html' %}
+  </div>
+
+  <!-- ════════════════════════════════════
+       MOBILE SIDEBAR OVERLAY
+       ════════════════════════════════════ -->
+  <div id="sidebarOverlay"></div>
+
+  <!-- ════════════════════════════════════
+       MOBILE SIDEBAR DRAWER
+       ════════════════════════════════════ -->
+  <div id="mobileSidebar" class="sm:hidden bg-white border-r border-slate-200 shadow-xl flex flex-col">
+    <!-- Close button inside drawer -->
+    <button
+      id="sidebarClose"
+      class="absolute top-3 right-3 h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+      aria-label="Tutup menu"
+    >
+      <i class="fa-solid fa-xmark text-base"></i>
+    </button>
+    {% include 'sidebar_user.html' %}
+  </div>
+
+  <!-- ════════════════════════════════════
+       MAIN CONTENT
+       ════════════════════════════════════ -->
+  <main class="flex-1 min-w-0">
+
+    <!-- Top Header -->
+    <div class="sticky top-0 z-30 h-14 bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 gap-3">
+      <!-- Hamburger — mobile only -->
+      <button
+        id="sidebarToggle"
+        class="sm:hidden h-9 w-9 flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 shrink-0 hover:bg-slate-100 transition"
+        aria-label="Buka menu"
+      >
+        <i class="fa-solid fa-bars text-sm"></i>
+      </button>
+      <div class="font-extrabold text-sm truncate">Profil Saya</div>
+    </div>
+
+    <div class="w-full max-w-3xl mx-auto px-3 sm:px-6 md:px-8 py-5 sm:py-8">
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div id="flash-container" class="fixed top-5 right-3 sm:right-5 z-50 space-y-3">
+            {% for category, message in messages %}
+              <div class="flash-message min-w-[220px] max-w-[calc(100vw-1.5rem)] sm:max-w-xs rounded-xl px-4 py-3 shadow-lg flex items-start gap-3 transition-all duration-500 opacity-0 translate-x-10
+                {% if category == 'success' %}
+                  bg-green-100 text-green-700 border border-green-200
+                {% else %}
+                  bg-red-100 text-red-700 border border-red-200
+                {% endif %}">
+                <div class="mt-1 shrink-0">
+                  {% if category == 'success' %}
+                    <i class="fa-solid fa-circle-check text-green-600"></i>
+                  {% else %}
+                    <i class="fa-solid fa-circle-xmark text-red-600"></i>
+                  {% endif %}
+                </div>
+                <div class="text-sm font-semibold">{{ message }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- ── PROFIL CARD ── -->
+      <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-4 sm:px-6 py-5 border-b border-slate-100">
+          <h1 class="text-xl sm:text-2xl font-extrabold">Profil Akun</h1>
+          <p class="mt-1 text-sm text-slate-500">Kelola data akun Anda di sini.</p>
+        </div>
+
+        <form id="profileForm" method="POST" enctype="multipart/form-data" action="{{ url_for('auth.profile_user') }}" class="p-4 sm:p-6 space-y-5">
+
+          <!-- Foto Profil -->
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+            <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
+              <div class="shrink-0">
+                <div class="h-24 w-24 sm:h-28 sm:w-28 rounded-full overflow-hidden border-2 border-emerald-200 bg-white shadow-sm">
+                  {% if current_user.profile_image %}
+                    <img id="profilePreview" src="{{ current_user.profile_image }}" alt="Foto Profil" class="h-full w-full object-cover">
+                  {% else %}
+                    <img id="profilePreview" src="https://ui-avatars.com/api/?name={{ current_user.fullname|urlencode }}&background=D1FAE5&color=065F46&size=200" alt="Avatar" class="h-full w-full object-cover">
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="flex-1 w-full text-center sm:text-left">
+                <label class="block text-sm font-extrabold text-slate-800">Foto Profil</label>
+                <p class="mt-1 text-xs text-slate-500">Upload foto profil baru. Format yang disarankan: JPG, PNG, atau WEBP.</p>
+
+                <div class="mt-4 flex flex-col xs:flex-row items-center sm:items-start gap-3">
+                  <label for="profile_image" class="inline-flex w-full xs:w-auto cursor-pointer items-center justify-center rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-extrabold text-white hover:brightness-95 transition">
+                    <i class="fa-solid fa-upload mr-2"></i>
+                    Pilih Foto
+                  </label>
+                  <input id="profile_image" type="file" name="profile_image" accept="image/*" class="hidden"/>
+                  <div id="fileName" class="inline-flex w-full xs:w-auto items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-500 truncate max-w-[200px]">
+                    Belum ada file dipilih
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Akun -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="text-xs font-extrabold text-slate-700">Nama Lengkap</label>
+              <input type="text" name="fullname" value="{{ current_user.fullname }}"
+                class="profile-field h-11 w-full rounded-xl border border-emerald-200 bg-white px-4 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                required/>
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-extrabold text-slate-700">Email</label>
+              <input type="email" name="email" value="{{ current_user.email }}"
+                class="profile-field h-11 w-full rounded-xl border border-emerald-200 bg-white px-4 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                required/>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-extrabold text-slate-700">Nomor Telepon</label>
+            <input type="text" name="phone" value="{{ current_user.phone or '' }}" placeholder="Masukkan nomor telepon"
+              class="profile-field h-11 w-full rounded-xl border border-emerald-200 bg-white px-4 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"/>
+          </div>
+
+          <!-- Ubah Password -->
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+            <div class="mb-4">
+              <h2 class="text-sm font-extrabold text-slate-800">Ubah Password</h2>
+              <p class="mt-1 text-xs text-slate-500">Kosongkan password jika tidak ingin mengubahnya.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="text-xs font-extrabold text-slate-700">Password Baru</label>
+                <input type="password" name="password" placeholder="Kosongkan jika tidak diubah"
+                  class="profile-field h-11 w-full rounded-xl border border-emerald-200 bg-white px-4 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"/>
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs font-extrabold text-slate-700">Konfirmasi Password Baru</label>
+                <input type="password" name="confirm_password" placeholder="Ulangi password baru"
+                  class="profile-field h-11 w-full rounded-xl border border-emerald-200 bg-white px-4 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action -->
+          <div class="flex flex-col sm:flex-row gap-3 pt-1">
+            <button id="saveButton" type="submit" disabled
+              class="inline-flex w-full sm:w-auto items-center justify-center rounded-xl px-6 py-3 text-sm font-extrabold text-white bg-slate-300 cursor-not-allowed transition">
+              <i class="fa-solid fa-floppy-disk mr-2"></i>
+              Simpan Perubahan
+            </button>
+            <a href="{{ url_for('auth.logout') }}"
+              class="nav-guard inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-extrabold text-slate-700 hover:bg-slate-50 transition">
+              <i class="fa-solid fa-right-from-bracket mr-2"></i>
+              Logout
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── ZONA BERBAHAYA ── -->
+      <div class="mt-5 sm:mt-6 rounded-2xl bg-white border border-red-200 shadow-sm overflow-hidden">
+        <div class="px-4 sm:px-6 py-5 border-b border-red-100">
+          <h2 class="text-lg sm:text-xl font-extrabold text-red-600">Zona Berbahaya</h2>
+          <p class="mt-1 text-sm text-slate-500">Hapus akun akan menghapus akun Anda secara permanen.</p>
+        </div>
+        <div class="p-4 sm:p-6">
+          <form action="{{ url_for('auth.delete_profile_user') }}" method="POST"
+            onsubmit="return confirm('Yakin ingin menghapus akun ini secara permanen?');">
+            <button type="submit"
+              class="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-red-500 px-6 py-3 text-sm font-extrabold text-white hover:bg-red-600 transition">
+              <i class="fa-solid fa-trash mr-2"></i>
+              Hapus Akun
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div><!-- /max-w-3xl -->
+  </main>
+</div>
+
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+  /* ── Sidebar toggle (mobile) ── */
+  const toggle   = document.getElementById("sidebarToggle");
+  const overlay  = document.getElementById("sidebarOverlay");
+  const drawer   = document.getElementById("mobileSidebar");
+  const closeBtn = document.getElementById("sidebarClose");
+
+  function openSidebar() {
+    drawer.classList.add("open");
+    overlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+  function closeSidebar() {
+    drawer.classList.remove("open");
+    overlay.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  toggle?.addEventListener("click", openSidebar);
+  closeBtn?.addEventListener("click", closeSidebar);
+  overlay?.addEventListener("click", closeSidebar);
+
+  /* ── Flash messages ── */
+  const flashMessages = document.querySelectorAll(".flash-message");
+  flashMessages.forEach((msg, index) => {
+    setTimeout(() => msg.classList.add("translate-x-0", "opacity-100"), index * 100);
+    setTimeout(() => {
+      msg.classList.add("opacity-0", "translate-x-10");
+      setTimeout(() => msg.remove(), 500);
+    }, 3000);
+    msg.addEventListener("click", () => msg.remove());
+  });
+
+  /* ── Dirty-check for save button ── */
+  const form       = document.getElementById("profileForm");
+  const saveButton = document.getElementById("saveButton");
+  const fileInput  = document.getElementById("profile_image");
+  const fileName   = document.getElementById("fileName");
+  const preview    = document.getElementById("profilePreview");
+  const fields     = form.querySelectorAll(".profile-field");
+  const navLinks   = document.querySelectorAll(".nav-guard, aside a");
+
+  let isDirty     = false;
+  let isSubmitting = false;
+
+  const initialValues = {};
+  fields.forEach(f => { initialValues[f.name] = f.value; });
+
+  function setSaveButtonState(enabled) {
+    if (enabled) {
+      saveButton.disabled = false;
+      saveButton.className = "inline-flex w-full sm:w-auto items-center justify-center rounded-xl px-6 py-3 text-sm font-extrabold text-white bg-emerald-500 hover:brightness-95 transition";
+    } else {
+      saveButton.disabled = true;
+      saveButton.className = "inline-flex w-full sm:w-auto items-center justify-center rounded-xl px-6 py-3 text-sm font-extrabold text-white bg-slate-300 cursor-not-allowed transition";
+    }
+  }
+
+  function checkDirty() {
+    let changed = false;
+    fields.forEach(f => { if (f.value !== initialValues[f.name]) changed = true; });
+    if (fileInput.files.length > 0) changed = true;
+    isDirty = changed;
+    setSaveButtonState(isDirty);
+  }
+
+  fields.forEach(f => {
+    f.addEventListener("input", checkDirty);
+    f.addEventListener("change", checkDirty);
+  });
+
+  fileInput?.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) { fileName.textContent = "Belum ada file dipilih"; checkDirty(); return; }
+    fileName.textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = e => { preview.src = e.target.result; };
+    reader.readAsDataURL(file);
+    checkDirty();
+  });
+
+  form.addEventListener("submit", () => { isSubmitting = true; });
+
+  window.addEventListener("beforeunload", e => {
+    if (isDirty && !isSubmitting) { e.preventDefault(); e.returnValue = ""; }
+  });
+
+  navLinks.forEach(link => {
+    link.addEventListener("click", e => {
+      const href = link.getAttribute("href");
+      if (isDirty && !isSubmitting && href && !href.startsWith("#")) {
+        if (!confirm("Perubahan belum disimpan. Yakin ingin meninggalkan halaman ini?")) {
+          e.preventDefault();
+        }
+      }
+    });
+  });
+
+  setSaveButtonState(false);
+});
+</script>
+</body>
+</html>

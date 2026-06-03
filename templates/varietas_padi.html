@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Varietas Padi</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body { font-family: "Inter", sans-serif; }
+
+    .action-btn {
+      height: 36px;
+      width: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      transition: all .2s;
+    }
+    .action-btn:hover { transform: translateY(-2px); }
+
+    /* Sidebar */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 30;
+    }
+    #sidebar-overlay.active { display: block; }
+
+    #sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 272px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      background: white;
+      border-right: 1px solid #e2e8f0;
+    }
+    #sidebar.open { transform: translateX(0); }
+
+    @media (min-width: 1024px) {
+      #sidebar {
+        position: relative;
+        transform: translateX(0) !important;
+        flex-shrink: 0;
+        width: 272px;
+      }
+      #sidebar-overlay { display: none !important; }
+      #mobile-menu-btn { display: none !important; }
+    }
+  </style>
+</head>
+
+<body class="h-full bg-[#F3F6F3] text-slate-900">
+<div class="min-h-screen flex">
+
+  <!-- Overlay mobile -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    {% include 'sidebar_admin.html' %}
+  </div>
+
+  <main class="flex-1 min-w-0 flex flex-col">
+
+    <!-- Top bar mobile -->
+    <div class="h-14 border-b border-slate-200 bg-[#F3F6F3] flex items-center px-4 gap-3 shrink-0 lg:hidden">
+      <button id="mobile-menu-btn" onclick="openSidebar()"
+              class="p-2 rounded-lg hover:bg-slate-200 transition">
+        <i class="fa-solid fa-bars text-slate-600"></i>
+      </button>
+      <span class="font-extrabold text-sm text-slate-700">Varietas Padi</span>
+    </div>
+
+    <div class="flex-1 overflow-auto">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+
+        <!-- FLASH MESSAGE -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-4 space-y-2">
+              {% for category, message in messages %}
+                <div class="rounded-xl px-4 py-3 text-sm font-semibold
+                  {% if category == 'success' %}
+                    bg-green-100 text-green-700 border border-green-200
+                  {% else %}
+                    bg-red-100 text-red-700 border border-red-200
+                  {% endif %}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- HEADER -->
+        <div class="flex flex-wrap justify-between items-start gap-3 mb-6">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-extrabold">Kelola Varietas Padi</h1>
+            <p class="text-slate-500 text-sm mt-1">Konfigurasi jadwal pertumbuhan varietas padi</p>
+          </div>
+          <a href="{{ url_for('auth.tambah_varietas') }}"
+             class="bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold hover:brightness-95 transition text-sm whitespace-nowrap">
+            <i class="fa-solid fa-plus mr-2"></i>Tambah
+          </a>
+        </div>
+
+        <!-- TABLE — desktop -->
+        <div class="hidden md:block bg-white rounded-2xl shadow border border-slate-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[640px]">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="px-6 py-4 text-left font-extrabold text-slate-500 text-xs uppercase tracking-wider">Nama</th>
+                  <th class="px-6 py-4 text-center font-extrabold text-slate-500 text-xs uppercase tracking-wider">Penyemaian</th>
+                  <th class="px-6 py-4 text-center font-extrabold text-slate-500 text-xs uppercase tracking-wider">Penanaman</th>
+                  <th class="px-6 py-4 text-center font-extrabold text-slate-500 text-xs uppercase tracking-wider">Pupuk 1</th>
+                  <th class="px-6 py-4 text-center font-extrabold text-slate-500 text-xs uppercase tracking-wider">Pupuk 2</th>
+                  <th class="px-6 py-4 text-center font-extrabold text-slate-500 text-xs uppercase tracking-wider">Panen</th>
+                  <th class="px-6 py-4 text-center font-extrabold text-slate-500 text-xs uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for v in varietas_list %}
+                <tr class="border-t hover:bg-slate-50">
+                  <td class="px-6 py-4 font-bold">{{ v.nama }}</td>
+                  <td class="px-6 py-4 text-center">{{ v.hari_penyemaian }} hari</td>
+                  <td class="px-6 py-4 text-center">{{ v.hari_penanaman }} hari</td>
+                  <td class="px-6 py-4 text-center">{{ v.hari_pemupukan_1 or '-' }}</td>
+                  <td class="px-6 py-4 text-center">{{ v.hari_pemupukan_2 or '-' }}</td>
+                  <td class="px-6 py-4 text-center font-bold text-emerald-600">{{ v.hari_panen }} hari</td>
+                  <td class="px-6 py-4">
+                    <div class="flex justify-center gap-2">
+                      <a href="{{ url_for('auth.edit_varietas', id=v.id) }}"
+                         class="action-btn bg-emerald-500 text-white hover:bg-emerald-600">
+                        <i class="fa-solid fa-pen"></i>
+                      </a>
+                      <form method="POST" action="{{ url_for('auth.delete_varietas', id=v.id) }}"
+                            onsubmit="return confirm('Hapus varietas ini?')">
+                        <button type="submit" class="action-btn bg-red-500 text-white hover:bg-red-600">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="7" class="px-6 py-8 text-center text-slate-500">Belum ada data varietas.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CARD LIST — mobile -->
+        <div class="md:hidden space-y-3">
+          {% for v in varietas_list %}
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-extrabold text-slate-800 text-base">{{ v.nama }}</span>
+              <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">
+                Panen {{ v.hari_panen }} hari
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-slate-600 mb-4">
+              <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Penyemaian</span>
+                <div class="font-semibold text-slate-800">{{ v.hari_penyemaian }} hari</div>
+              </div>
+              <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Penanaman</span>
+                <div class="font-semibold text-slate-800">{{ v.hari_penanaman }} hari</div>
+              </div>
+              <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Pupuk 1</span>
+                <div class="font-semibold text-slate-800">{{ v.hari_pemupukan_1 or '-' }}</div>
+              </div>
+              <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Pupuk 2</span>
+                <div class="font-semibold text-slate-800">{{ v.hari_pemupukan_2 or '-' }}</div>
+              </div>
+            </div>
+            <div class="flex gap-2 pt-3 border-t border-slate-100">
+              <a href="{{ url_for('auth.edit_varietas', id=v.id) }}"
+                 class="flex-1 flex items-center justify-center gap-2 bg-emerald-500 text-white text-sm font-bold py-2 rounded-xl hover:brightness-95 transition">
+                <i class="fa-solid fa-pen"></i> Edit
+              </a>
+              <form method="POST" action="{{ url_for('auth.delete_varietas', id=v.id) }}"
+                    onsubmit="return confirm('Hapus varietas ini?')" class="flex-1">
+                <button type="submit"
+                        class="w-full flex items-center justify-center gap-2 bg-red-500 text-white text-sm font-bold py-2 rounded-xl hover:brightness-95 transition">
+                  <i class="fa-solid fa-trash"></i> Hapus
+                </button>
+              </form>
+            </div>
+          </div>
+          {% else %}
+          <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500">
+            Belum ada data varietas.
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+</script>
+</body>
+</html>

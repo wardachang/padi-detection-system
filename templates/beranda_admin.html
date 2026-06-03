@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beranda - Rice Health System</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body {
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 30;
+    }
+
+    #sidebar-overlay.active {
+      display: block;
+    }
+
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 272px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      background: white;
+      border-right: 1px solid #e2e8f0;
+      overflow-y: auto;
+    }
+
+    #sidebar.open {
+      transform: translateX(0);
+    }
+
+    @media (min-width: 1024px) {
+      #sidebar {
+        transform: translateX(0) !important;
+      }
+
+      #sidebar-overlay {
+        display: none !important;
+      }
+
+      #mobile-menu-btn {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="h-full overflow-hidden bg-[#F3F6F3] text-slate-900">
+
+  <!-- POPUP FLASH MESSAGE TEPAT DI TENGAH LAYAR -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="loginFlashOverlay" class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/20 transition-opacity duration-500">
+        {% for category, message in messages %}
+          <div class="login-flash-popup w-[90%] max-w-sm rounded-3xl bg-white px-8 py-7 text-center shadow-2xl border transition-all duration-500 scale-100 opacity-100
+            {% if category == 'success' %}
+              border-emerald-200
+            {% elif category == 'error' or category == 'danger' %}
+              border-red-200
+            {% else %}
+              border-slate-200
+            {% endif %}">
+
+            {% if category == 'success' %}
+              <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+                <i class="fa-solid fa-circle-check text-3xl text-emerald-600"></i>
+              </div>
+
+              <h2 class="text-xl font-extrabold text-emerald-700">
+                {{ message }}
+              </h2>
+
+              <p class="mt-2 text-sm text-slate-500">
+                Selamat datang di halaman admin Rice Health System.
+              </p>
+
+            {% elif category == 'error' or category == 'danger' %}
+              <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                <i class="fa-solid fa-circle-exclamation text-3xl text-red-600"></i>
+              </div>
+
+              <h2 class="text-xl font-extrabold text-red-700">
+                {{ message }}
+              </h2>
+
+              <p class="mt-2 text-sm text-slate-500">
+                Silakan periksa kembali data Anda.
+              </p>
+
+            {% else %}
+              <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+                <i class="fa-solid fa-circle-info text-3xl text-slate-600"></i>
+              </div>
+
+              <h2 class="text-xl font-extrabold text-slate-700">
+                {{ message }}
+              </h2>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Overlay mobile -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    {% include 'sidebar_admin.html' %}
+  </aside>
+
+  <!-- Main -->
+  <main class="h-screen flex flex-col overflow-hidden lg:ml-[272px]">
+
+    <!-- NAVBAR ATAS -->
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 lg:px-8 shrink-0">
+      <button id="mobile-menu-btn"
+              onclick="openSidebar()"
+              class="p-2 mr-3 rounded-lg hover:bg-slate-100 transition">
+        <i class="fa-solid fa-bars text-slate-600"></i>
+      </button>
+
+      <h1 class="text-sm font-extrabold text-slate-900">
+        Beranda
+      </h1>
+    </header>
+
+    <!-- KONTEN -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+
+      <!-- SATU CARD BESAR -->
+      <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+
+        <!-- HEADER CARD -->
+        <div class="px-5 sm:px-7 py-6 border-b border-slate-100">
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            Ringkasan Dashboard
+          </h2>
+          <p class="mt-2 text-sm text-slate-500">
+            Lihat ringkasan pengguna, penyakit terdeteksi, total deteksi, dan aktivitas deteksi terbaru.
+          </p>
+        </div>
+
+        <!-- STATISTIK -->
+        <div class="bg-slate-50/80 px-5 sm:px-7 py-6 border-b border-slate-100">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <!-- TOTAL PENGGUNA -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-5">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <div class="text-sm font-bold text-slate-500">
+                    Total Pengguna
+                  </div>
+                  <div class="mt-3 text-3xl font-extrabold text-slate-900">
+                    {{ total_pengguna }}
+                  </div>
+                </div>
+
+                <div class="h-14 w-14 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-users text-emerald-600 text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- PENYAKIT TERDETEKSI -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-5">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <div class="text-sm font-bold text-slate-500">
+                    Penyakit Terdeteksi
+                  </div>
+                  <div class="mt-3 text-3xl font-extrabold text-red-600">
+                    {{ penyakit_terdeteksi }}
+                  </div>
+                </div>
+
+                <div class="h-14 w-14 rounded-2xl bg-red-100 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-bug text-red-500 text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- TOTAL DETEKSI -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-5">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <div class="text-sm font-bold text-slate-500">
+                    Total Deteksi
+                  </div>
+                  <div class="mt-3 text-3xl font-extrabold text-slate-900">
+                    {{ total_deteksi }}
+                  </div>
+                </div>
+
+                <div class="h-14 w-14 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-expand text-emerald-600 text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- AKTIVITAS DETEKSI -->
+        <div class="px-5 sm:px-7 py-6">
+          <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h3 class="text-xl font-extrabold text-slate-900">
+                Aktivitas Deteksi Terbaru
+              </h3>
+              <p class="mt-1 text-sm text-slate-500">
+                Lihat aktivitas deteksi terbaru dari para petani.
+              </p>
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[720px]">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr class="text-left">
+                    <th class="px-5 py-4 text-xs uppercase tracking-widest font-extrabold text-slate-500">
+                      No
+                    </th>
+                    <th class="px-5 py-4 text-xs uppercase tracking-widest font-extrabold text-slate-500">
+                      Nama Petani
+                    </th>
+                    <th class="px-5 py-4 text-xs uppercase tracking-widest font-extrabold text-slate-500">
+                      Status Deteksi
+                    </th>
+                    <th class="px-5 py-4 text-xs uppercase tracking-widest font-extrabold text-slate-500">
+                      Kepercayaan
+                    </th>
+                    <th class="px-5 py-4 text-xs uppercase tracking-widest font-extrabold text-slate-500">
+                      Waktu
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100">
+                  {% if aktivitas_terbaru %}
+                    {% for item, user in aktivitas_terbaru %}
+                      <tr class="activity-row hover:bg-slate-50 transition">
+                        <td class="px-5 py-4 text-sm text-slate-600">
+                          {{ loop.index }}
+                        </td>
+
+                        <td class="px-5 py-4">
+                          <div class="font-bold text-slate-900 text-sm">
+                            {{ user.fullname }}
+                          </div>
+                        </td>
+
+                        <td class="px-5 py-4">
+                          {% if item.hasil == 'Healthy Rice Leaf' %}
+                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700 whitespace-nowrap">
+                              <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                              Sehat
+                            </span>
+                          {% elif item.hasil == 'Brown Spot' %}
+                            <span class="inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-extrabold text-orange-700 whitespace-nowrap">
+                              <span class="h-2 w-2 rounded-full bg-orange-500"></span>
+                              Brown Spot
+                            </span>
+                          {% elif item.hasil == 'Leaf Blast' %}
+                            <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-extrabold text-red-700 whitespace-nowrap">
+                              <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                              Leaf Blast
+                            </span>
+                          {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                            <span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-3 py-1 text-xs font-extrabold text-yellow-700 whitespace-nowrap">
+                              <span class="h-2 w-2 rounded-full bg-yellow-500"></span>
+                              Bacterial Leaf Blight
+                            </span>
+                          {% elif item.hasil == 'Bukan Padi' %}
+                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700 whitespace-nowrap">
+                              <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                              Bukan Padi
+                            </span>
+                          {% else %}
+                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700 whitespace-nowrap">
+                              <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                              {{ item.hasil }}
+                            </span>
+                          {% endif %}
+                        </td>
+
+                        <td class="px-5 py-4">
+                          <div class="font-bold text-slate-700 text-sm">
+                            {{ "%.1f"|format(item.confidence) }}%
+                          </div>
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">
+                          {{ item.created_at.strftime('%d %b %Y • %H:%M') }}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="5" class="px-6 py-10 text-center text-slate-500">
+                        Belum ada aktivitas deteksi.
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+
+            {% if aktivitas_terbaru %}
+              <div class="px-5 py-4 border-t border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div id="pagination-info" class="text-xs font-semibold text-slate-500"></div>
+
+                <div class="flex items-center gap-2">
+                  <button type="button"
+                          id="prev-page"
+                          onclick="changeActivityPage(-1)"
+                          class="h-10 px-4 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition">
+                    <i class="fa-solid fa-chevron-left mr-1"></i>
+                    Sebelumnya
+                  </button>
+
+                  <div id="page-numbers" class="flex items-center gap-1"></div>
+
+                  <button type="button"
+                          id="next-page"
+                          onclick="changeActivityPage(1)"
+                          class="h-10 px-4 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition">
+                    Berikutnya
+                    <i class="fa-solid fa-chevron-right ml-1"></i>
+                  </button>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <script>
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('sidebar-overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const overlay = document.getElementById("loginFlashOverlay");
+      const popups = document.querySelectorAll(".login-flash-popup");
+
+      if (overlay && popups.length > 0) {
+        setTimeout(() => {
+          popups.forEach((popup) => {
+            popup.classList.add("opacity-0", "scale-90");
+          });
+
+          overlay.classList.add("opacity-0");
+
+          setTimeout(() => {
+            overlay.remove();
+          }, 500);
+        }, 2500);
+      }
+    });
+
+    const activityRows = Array.from(document.querySelectorAll('.activity-row'));
+    const rowsPerPage = 5;
+    let currentActivityPage = 1;
+    const totalActivityPages = Math.ceil(activityRows.length / rowsPerPage);
+
+    function renderActivityTable() {
+      if (activityRows.length === 0) return;
+
+      const start = (currentActivityPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+
+      activityRows.forEach((row, index) => {
+        row.style.display = index >= start && index < end ? '' : 'none';
+      });
+
+      const paginationInfo = document.getElementById('pagination-info');
+      const prevButton = document.getElementById('prev-page');
+      const nextButton = document.getElementById('next-page');
+      const pageNumbers = document.getElementById('page-numbers');
+
+      if (paginationInfo) {
+        paginationInfo.textContent =
+          `Menampilkan ${start + 1}-${Math.min(end, activityRows.length)} dari ${activityRows.length} aktivitas`;
+      }
+
+      if (prevButton) {
+        prevButton.disabled = currentActivityPage === 1;
+        prevButton.classList.toggle('opacity-50', currentActivityPage === 1);
+        prevButton.classList.toggle('cursor-not-allowed', currentActivityPage === 1);
+      }
+
+      if (nextButton) {
+        nextButton.disabled = currentActivityPage === totalActivityPages;
+        nextButton.classList.toggle('opacity-50', currentActivityPage === totalActivityPages);
+        nextButton.classList.toggle('cursor-not-allowed', currentActivityPage === totalActivityPages);
+      }
+
+      if (pageNumbers) {
+        pageNumbers.innerHTML = '';
+
+        for (let i = 1; i <= totalActivityPages; i++) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = i;
+          button.onclick = () => goToActivityPage(i);
+
+          button.className =
+            i === currentActivityPage
+              ? 'h-10 w-10 rounded-xl bg-emerald-500 text-white text-xs font-extrabold'
+              : 'h-10 w-10 rounded-xl border border-slate-200 text-slate-600 text-xs font-extrabold hover:bg-slate-50 transition';
+
+          pageNumbers.appendChild(button);
+        }
+      }
+    }
+
+    function changeActivityPage(direction) {
+      const nextPage = currentActivityPage + direction;
+
+      if (nextPage < 1 || nextPage > totalActivityPages) return;
+
+      currentActivityPage = nextPage;
+      renderActivityTable();
+    }
+
+    function goToActivityPage(page) {
+      currentActivityPage = page;
+      renderActivityTable();
+    }
+
+    renderActivityTable();
+  </script>
+
+</body>
+</html>

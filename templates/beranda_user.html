@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="id" class="min-h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rice Health System - Beranda</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    html, body {
+      min-height: 100%;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+
+    /* ── OVERLAY ── */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 40;
+    }
+
+    #sidebar-overlay.active {
+      display: block;
+    }
+
+    /* ── SIDEBAR MOBILE ── */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 260px;
+      z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      background: #fff;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #sidebar.open {
+      transform: translateX(0);
+    }
+
+    /* ── SIDEBAR DESKTOP ── */
+    @media (min-width: 1024px) {
+      #sidebar {
+        position: sticky;
+        top: 0;
+        left: 0;
+        bottom: auto;
+        transform: translateX(0) !important;
+        flex-shrink: 0;
+        width: 260px;
+        height: 100vh;
+        align-self: flex-start;
+        overflow-y: auto;
+      }
+
+      #sidebar-inner {
+        min-height: 100vh;
+      }
+
+      #sidebar-overlay {
+        display: none !important;
+      }
+
+      #mobile-menu-btn {
+        display: none !important;
+      }
+    }
+
+    .schedule-card {
+      min-height: 320px;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-[#F3F6F3] text-slate-900">
+
+  <!-- POPUP FLASH MESSAGE TEPAT DI TENGAH LAYAR -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="loginFlashOverlay" class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/20 transition-opacity duration-500">
+        {% for category, message in messages %}
+          <div class="login-flash-popup w-[90%] max-w-sm rounded-3xl bg-white px-8 py-7 text-center shadow-2xl border transition-all duration-500 scale-100 opacity-100
+            {% if category == 'success' %}
+              border-emerald-200
+            {% elif category == 'error' %}
+              border-red-200
+            {% else %}
+              border-slate-200
+            {% endif %}">
+
+            {% if category == 'success' %}
+              <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+                <i class="fa-solid fa-circle-check text-3xl text-emerald-600"></i>
+              </div>
+
+              <h2 class="text-xl font-extrabold text-emerald-700">
+                {{ message }}
+              </h2>
+
+              <p class="mt-2 text-sm text-slate-500">
+                Selamat datang di Rice Health System.
+              </p>
+            {% elif category == 'error' %}
+              <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                <i class="fa-solid fa-circle-exclamation text-3xl text-red-600"></i>
+              </div>
+
+              <h2 class="text-xl font-extrabold text-red-700">
+                {{ message }}
+              </h2>
+
+              <p class="mt-2 text-sm text-slate-500">
+                Silakan periksa kembali data Anda.
+              </p>
+            {% else %}
+              <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+                <i class="fa-solid fa-circle-info text-3xl text-slate-600"></i>
+              </div>
+
+              <h2 class="text-xl font-extrabold text-slate-700">
+                {{ message }}
+              </h2>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="flex min-h-screen items-stretch">
+
+    <!-- Overlay Mobile -->
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+      {% include 'sidebar_user.html' %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 min-w-0 flex flex-col">
+
+      <!-- Top Bar -->
+      <div class="h-14 bg-white border-b border-slate-200 flex items-center px-4 lg:px-6 gap-3 sticky top-0 z-30">
+        <button id="mobile-menu-btn"
+                onclick="openSidebar()"
+                class="p-2 rounded-lg hover:bg-slate-100 transition lg:hidden">
+          <i class="fa-solid fa-bars text-slate-600 text-lg"></i>
+        </button>
+
+        <div class="font-extrabold text-sm">Beranda</div>
+      </div>
+
+      <!-- Page Body -->
+      <div class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
+
+        <!-- Greeting -->
+        <div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+            Halo, {{ current_user.fullname }}!
+          </h1>
+          <p class="mt-2 text-slate-600 text-sm sm:text-base">
+            Pantau tanaman padi Anda dan deteksi penyakit secara instan dengan AI.
+          </p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-xs font-semibold text-slate-500">Total Deteksi</div>
+                <div class="mt-2 text-2xl font-extrabold">{{ total_deteksi }}</div>
+                <div class="mt-2 text-xs font-bold text-emerald-600">Data milik akun Anda</div>
+              </div>
+              <div class="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0">
+                <i class="fa-solid fa-chart-column"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-xs font-semibold text-slate-500">Tanaman Sehat</div>
+                <div class="mt-2 text-2xl font-extrabold">{{ total_sehat }}</div>
+                <div class="mt-2 text-xs font-semibold text-slate-500">Berdasarkan hasil deteksi Anda</div>
+              </div>
+              <div class="h-9 w-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 flex-shrink-0">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-xs font-semibold text-slate-500">Masalah Terdeteksi</div>
+                <div class="mt-2 text-2xl font-extrabold">{{ total_penyakit }}</div>
+                <div class="mt-2 text-xs font-bold text-red-500">Perlu perhatian</div>
+              </div>
+              <div class="h-9 w-9 rounded-xl bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload + Schedule -->
+        <div class="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+
+          <!-- Upload Card -->
+          <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5 sm:p-6 h-full">
+            <div class="min-h-[320px] h-full rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/30 p-8 sm:p-10 flex flex-col items-center justify-center text-center">
+              <div class="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                <i class="fa-solid fa-camera text-emerald-600"></i>
+              </div>
+
+              <div class="mt-4 font-extrabold text-sm sm:text-base">
+                Unggah Foto untuk Deteksi
+              </div>
+
+              <div class="mt-1 text-xs sm:text-sm text-slate-500">
+                Mendukung file JPG, PNG hingga 10MB
+              </div>
+
+              <a href="{{ url_for('deteksi') }}"
+                 class="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-extrabold text-white hover:brightness-95 transition">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                Mulai Unggah
+              </a>
+            </div>
+          </div>
+
+          <!-- Schedule Card -->
+          <div class="schedule-card relative overflow-hidden rounded-2xl border border-slate-200 shadow-sm h-full">
+
+            <!-- Gambar petani menanam padi dari file lokal -->
+              <div
+                class="absolute inset-0 bg-cover bg-center"
+                style="background-image: url('{{ url_for('static', filename='images/petani1.jpg') }}');">
+              </div>
+
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10"></div>
+
+            <div class="absolute left-4 sm:left-6 top-4 sm:top-6">
+              <span class="inline-flex items-center rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-extrabold text-white shadow-sm">
+                JADWAL TANAM
+              </span>
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
+              {% if jadwal %}
+                <div class="text-base sm:text-lg font-bold text-emerald-300 drop-shadow">
+                  🌾 {{ progress_percent }}% menuju panen
+                </div>
+
+                <div class="w-full bg-white/20 rounded-full h-2.5 sm:h-3 mt-2 overflow-hidden">
+                  <div class="bg-emerald-400 h-2.5 sm:h-3 rounded-full"
+                       style="width: {{ progress_percent }}%"></div>
+                </div>
+
+                <div class="mt-3 text-lg sm:text-xl font-extrabold drop-shadow">
+                  {{ countdown }}
+                </div>
+
+                <p class="mt-2 text-xs sm:text-sm text-white/85 max-w-md">
+                  Pantau jadwal tanam Anda agar hasil panen lebih optimal.
+                </p>
+
+                <a href="{{ url_for('auth.jadwal_user') }}"
+                   class="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-emerald-300 hover:text-emerald-200 transition">
+                  Lihat Jadwal <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              {% else %}
+                <div class="text-lg sm:text-xl font-extrabold drop-shadow">
+                  Belum ada jadwal tanam
+                </div>
+
+                <p class="mt-2 text-xs sm:text-sm text-white/85 max-w-md">
+                  Silakan buat jadwal tanam terlebih dahulu.
+                </p>
+
+                <a href="{{ url_for('auth.jadwal_user') }}"
+                   class="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-emerald-300 hover:text-emerald-200 transition">
+                  Buat Jadwal <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+          <!-- Riwayat Deteksi Terbaru -->
+          <div class="mt-5 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+
+            <!-- Header -->
+            <div class="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+              <div>
+                <h2 class="font-extrabold text-slate-900">Riwayat Deteksi Terbaru</h2>
+                <p class="mt-1 text-xs sm:text-sm text-slate-500">
+                  3 hasil deteksi terakhir yang pernah Anda lakukan.
+                </p>
+              </div>
+
+              <a href="{{ url_for('auth.riwayat_user') }}"
+                class="shrink-0 inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-xs sm:text-sm font-extrabold text-emerald-700 hover:bg-emerald-100 transition">
+                Lihat Selengkapnya
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+              </a>
+            </div>
+
+            {% if histories %}
+
+              <!-- Table Desktop -->
+              <div class="hidden md:block overflow-x-auto">
+                <table class="min-w-full">
+                  <thead class="bg-slate-50">
+                    <tr class="text-left text-[11px] font-extrabold tracking-widest text-slate-500 uppercase">
+                      <th class="px-6 py-4">Pratinjau</th>
+                      <th class="px-6 py-4">Info Deteksi</th>
+                      <th class="px-6 py-4">Status</th>
+                      <th class="px-6 py-4">Kepercayaan CNN</th>
+                      <th class="px-6 py-4 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+
+                  <tbody class="divide-y divide-slate-100">
+                    {% for item in histories[:3] %}
+                      <tr class="bg-white hover:bg-slate-50 transition">
+                        
+                        <td class="px-6 py-4">
+                          <img
+                            src="{{ item.image_path }}"
+                            alt="Preview deteksi"
+                            class="h-14 w-14 rounded-xl object-cover border border-slate-200"
+                          >
+                        </td>
+
+                        <td class="px-6 py-4">
+                          <div class="text-sm font-extrabold text-slate-900">
+                            {{ item.hasil }}
+                          </div>
+                          <div class="text-xs text-slate-500 mt-1">
+                            {{ item.created_at.strftime('%d %b %Y • %H:%M') if item.created_at else '-' }}
+                          </div>
+                        </td>
+
+                        <td class="px-6 py-4">
+                          {% if item.hasil == 'Healthy Rice Leaf' %}
+                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
+                              Sehat
+                            </span>
+                          {% elif item.hasil == 'Brown Spot' %}
+                            <span class="inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-xs font-extrabold text-orange-700">
+                              Brown Spot
+                            </span>
+                          {% elif item.hasil == 'Leaf Blast' %}
+                            <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-extrabold text-red-600">
+                              Leaf Blast
+                            </span>
+                          {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-xs font-extrabold text-yellow-700">
+                              BLB
+                            </span>
+                          {% elif item.hasil == 'Bukan Padi' %}
+                            <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">
+                              Bukan Padi
+                            </span>
+                          {% else %}
+                            <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">
+                              {{ item.hasil }}
+                            </span>
+                          {% endif %}
+                        </td>
+
+                        <td class="px-6 py-4">
+                          <div class="flex items-center gap-3">
+                            <div class="h-2 w-36 lg:w-48 rounded-full bg-slate-100 overflow-hidden">
+                              {% if item.hasil == 'Healthy Rice Leaf' %}
+                                <div class="h-full bg-emerald-500" style="width: {{ item.confidence }}%;"></div>
+                              {% elif item.hasil == 'Brown Spot' %}
+                                <div class="h-full bg-orange-500" style="width: {{ item.confidence }}%;"></div>
+                              {% elif item.hasil == 'Leaf Blast' %}
+                                <div class="h-full bg-red-500" style="width: {{ item.confidence }}%;"></div>
+                              {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                                <div class="h-full bg-yellow-500" style="width: {{ item.confidence }}%;"></div>
+                              {% else %}
+                                <div class="h-full bg-slate-500" style="width: {{ item.confidence }}%;"></div>
+                              {% endif %}
+                            </div>
+
+                            <div class="text-xs font-extrabold text-slate-700">
+                              {{ "%.1f"|format(item.confidence) }}%
+                            </div>
+                          </div>
+                        </td>
+
+                        <td class="px-6 py-4 text-right">
+                          <a href="{{ url_for('auth.riwayat_user') }}"
+                            class="text-sm font-extrabold text-emerald-600 hover:underline">
+                            Lihat Detail
+                          </a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mobile List -->
+              <div class="md:hidden divide-y divide-slate-100">
+                {% for item in histories[:3] %}
+                  <div class="p-4 flex gap-4 bg-white">
+                    <img
+                      src="{{ item.image_path }}"
+                      alt="Preview deteksi"
+                      class="h-16 w-16 rounded-xl object-cover border border-slate-200 shrink-0"
+                    >
+
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                          <div class="text-sm font-extrabold text-slate-900 truncate">
+                            {{ item.hasil }}
+                          </div>
+
+                          <div class="mt-1 text-[11px] text-slate-500">
+                            {{ item.created_at.strftime('%d %b %Y • %H:%M') if item.created_at else '-' }}
+                          </div>
+                        </div>
+
+                        <div class="text-xs font-extrabold text-slate-600 shrink-0">
+                          {{ "%.1f"|format(item.confidence) }}%
+                        </div>
+                      </div>
+
+                      <div class="mt-3 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                        {% if item.hasil == 'Healthy Rice Leaf' %}
+                          <div class="h-full bg-emerald-500" style="width: {{ item.confidence }}%;"></div>
+                        {% elif item.hasil == 'Brown Spot' %}
+                          <div class="h-full bg-orange-500" style="width: {{ item.confidence }}%;"></div>
+                        {% elif item.hasil == 'Leaf Blast' %}
+                          <div class="h-full bg-red-500" style="width: {{ item.confidence }}%;"></div>
+                        {% elif item.hasil == 'Bacterial Leaf Blight' %}
+                          <div class="h-full bg-yellow-500" style="width: {{ item.confidence }}%;"></div>
+                        {% else %}
+                          <div class="h-full bg-slate-500" style="width: {{ item.confidence }}%;"></div>
+                        {% endif %}
+                      </div>
+
+                      <a href="{{ url_for('auth.riwayat_user') }}"
+                        class="mt-3 inline-flex text-xs font-extrabold text-emerald-600 hover:underline">
+                        Lihat Detail
+                      </a>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+
+            {% else %}
+
+              <div class="p-8 text-center">
+                <div class="mx-auto h-14 w-14 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                  <i class="fa-solid fa-clock-rotate-left text-emerald-600 text-xl"></i>
+                </div>
+
+                <h3 class="mt-4 text-base font-extrabold text-slate-800">
+                  Belum ada riwayat deteksi
+                </h3>
+
+                <p class="mt-2 text-sm text-slate-500">
+                  Riwayat akan muncul setelah Anda melakukan deteksi penyakit daun padi.
+                </p>
+
+                <a href="{{ url_for('deteksi') }}"
+                  class="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-extrabold text-white hover:brightness-95 transition">
+                  Mulai Deteksi
+                  <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
+              </div>
+
+            {% endif %}
+          </div>
+        
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('sidebar-overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const overlay = document.getElementById("loginFlashOverlay");
+      const popups = document.querySelectorAll(".login-flash-popup");
+
+      if (overlay && popups.length > 0) {
+        setTimeout(() => {
+          popups.forEach((popup) => {
+            popup.classList.add("opacity-0", "scale-90");
+          });
+
+          overlay.classList.add("opacity-0");
+
+          setTimeout(() => {
+            overlay.remove();
+          }, 500);
+        }, 2500);
+      }
+    });
+  </script>
+</body>
+</html>

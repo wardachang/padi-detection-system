@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rice Health System - Jadwal User</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body {
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 40;
+    }
+
+    #sidebar-overlay.active {
+      display: block;
+    }
+
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 260px;
+      z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      background: #fff;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #sidebar.open {
+      transform: translateX(0);
+    }
+
+    @media (min-width: 1024px) {
+      #sidebar {
+        position: sticky;
+        top: 0;
+        transform: translateX(0) !important;
+        flex-shrink: 0;
+        height: 100vh;
+        width: 260px;
+        overflow: hidden;
+        left: auto;
+        bottom: auto;
+      }
+
+      #sidebar-overlay {
+        display: none !important;
+      }
+
+      #mobile-menu-btn {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="h-screen overflow-hidden bg-[#F3F6F3] text-slate-900">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Overlay Mobile -->
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+      {% include 'sidebar_user.html' %}
+    </div>
+
+    <!-- Main Scroll Area -->
+    <main class="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto">
+
+      <!-- Top Header -->
+      <div class="sticky top-0 z-30 h-14 bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 gap-3">
+        <button
+          id="mobile-menu-btn"
+          onclick="openSidebar()"
+          class="p-2 rounded-lg hover:bg-slate-100 transition lg:hidden"
+          aria-label="Buka menu"
+        >
+          <i class="fa-solid fa-bars text-slate-600 text-lg"></i>
+        </button>
+
+        <div class="font-extrabold text-sm truncate">
+          {% if jadwal %}
+            Detail Jadwal Tanam
+          {% else %}
+            Kelola Jadwal Tanam
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 md:px-8 py-5 sm:py-8">
+
+        {% set schedules = jadwal_list if jadwal_list is defined else [] %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div id="flash-container" class="fixed top-5 right-3 sm:right-5 z-50 space-y-3">
+              {% for category, message in messages %}
+                <div class="flash-message min-w-[220px] max-w-[calc(100vw-1.5rem)] sm:max-w-xs rounded-xl px-4 py-3 shadow-lg flex items-start gap-3 transition-all duration-500 opacity-0 translate-x-10
+                  {% if category == 'success' %}
+                    bg-green-100 text-green-700 border border-green-200
+                  {% else %}
+                    bg-red-100 text-red-700 border border-red-200
+                  {% endif %}">
+                  <div class="mt-1 shrink-0">
+                    {% if category == 'success' %}
+                      <i class="fa-solid fa-circle-check text-green-600"></i>
+                    {% else %}
+                      <i class="fa-solid fa-circle-xmark text-red-600"></i>
+                    {% endif %}
+                  </div>
+                  <div class="text-sm font-semibold">{{ message }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% if jadwal %}
+
+          <!-- =======================
+               MODE DETAIL SCHEDULE
+          ======================== -->
+
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <a
+                href="{{ url_for('auth.jadwal_user') }}"
+                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-600 hover:bg-slate-50 transition shadow-sm"
+              >
+                <i class="fa-solid fa-arrow-left"></i>
+                Kembali ke List Schedule
+              </a>
+
+              <h1 class="mt-5 text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+                Detail Jadwal Tanam
+              </h1>
+
+              <p class="mt-2 text-sm text-emerald-700">
+                Detail tahapan pertumbuhan tanaman dari semai sampai panen.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 sm:mt-5 h-px bg-slate-200"></div>
+
+          <!-- Detail Header -->
+          <div class="mt-5 rounded-2xl bg-white border border-slate-200 shadow-sm p-4 sm:p-6">
+            <div class="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <div class="text-xs font-extrabold tracking-widest text-emerald-600 uppercase">
+                  Detail Schedule
+                </div>
+
+                <h2 class="mt-1 text-xl sm:text-2xl font-extrabold text-slate-900">
+                  {{ selected_varietas.nama if selected_varietas else 'Schedule Tanam' }}
+                </h2>
+
+                <p class="mt-1 text-sm text-slate-500">
+                  Semai:
+                  {{ jadwal.tanggal_semai.strftime('%d %B %Y') if jadwal.tanggal_semai else '-' }}
+                </p>
+              </div>
+
+              <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
+                Aktif
+              </span>
+            </div>
+          </div>
+
+          <!-- Peta Jalan Pertumbuhan -->
+          <div class="mt-5 rounded-2xl bg-white border border-slate-200 shadow-sm p-4 sm:p-6">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+              <h2 class="font-extrabold">Peta Jalan Pertumbuhan</h2>
+
+              {% if selected_varietas %}
+                <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
+                  {{ selected_varietas.nama }}
+                </span>
+              {% endif %}
+            </div>
+
+            {% if steps %}
+              <div class="mt-6 w-full overflow-x-auto pb-2">
+                <div class="relative" style="min-width: {{ steps|length * 90 }}px;">
+
+                  <div class="absolute left-0 right-0 top-6 h-1 rounded-full bg-slate-200"></div>
+                  <div class="absolute left-0 top-6 h-1 rounded-full bg-emerald-500" style="width: {{ progress_percent }}%;"></div>
+
+                  <div class="relative flex justify-between">
+                    {% for step in steps %}
+                      <div class="flex flex-col items-center" style="width: 90px;">
+                        <div class="h-12 w-12 rounded-full flex items-center justify-center shadow-sm shrink-0
+                          {% if step.done %}
+                            bg-emerald-500 text-white
+                          {% else %}
+                            bg-slate-100 text-slate-500 border border-slate-200
+                          {% endif %}">
+                          <i class="fa-solid {{ step.icon }}"></i>
+                        </div>
+
+                        <div class="mt-3 text-[11px] font-extrabold text-center leading-tight w-full px-1
+                          {% if not step.done %}text-slate-500{% endif %}">
+                          {{ step.label }}
+                        </div>
+
+                        <div class="mt-1 text-[10px] text-center w-full px-1
+                          {% if step.done %}text-emerald-600{% else %}text-slate-400{% endif %}">
+                          {{ step.date.strftime('%d %b %Y') if step.date else '-' }}
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+
+                </div>
+              </div>
+            {% else %}
+              <div class="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 sm:p-8 text-center">
+                <div class="mx-auto h-14 w-14 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                  <i class="fa-solid fa-seedling text-emerald-600 text-xl"></i>
+                </div>
+
+                <h3 class="mt-4 text-base sm:text-lg font-extrabold text-slate-800">
+                  Belum ada detail tahapan
+                </h3>
+
+                <p class="mt-2 text-sm text-slate-500">
+                  Detail tahapan belum tersedia.
+                </p>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3 sm:p-5 text-center">
+              <div class="text-[10px] font-extrabold tracking-widest text-emerald-700 leading-tight">
+                TOTAL DURASI
+              </div>
+              <div class="mt-2 text-2xl font-extrabold">{{ total_durasi }}</div>
+              <div class="text-xs text-slate-400 font-semibold">Hari</div>
+            </div>
+
+            <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3 sm:p-5 text-center">
+              <div class="text-[10px] font-extrabold tracking-widest text-emerald-700 leading-tight">
+                BERJALAN
+              </div>
+              <div class="mt-2 text-2xl font-extrabold">{{ waktu_berjalan }}</div>
+              <div class="text-xs text-slate-400 font-semibold">Hari</div>
+            </div>
+
+            <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3 sm:p-5 text-center">
+              <div class="text-[10px] font-extrabold tracking-widest text-emerald-700 leading-tight">
+                SISA WAKTU
+              </div>
+              <div class="mt-2 text-2xl font-extrabold">{{ sisa_waktu }}</div>
+              <div class="text-xs text-slate-400 font-semibold">Hari</div>
+            </div>
+          </div>
+
+          <!-- Ringkasan Jadwal -->
+          <div class="mt-5 rounded-2xl bg-white border border-slate-200 shadow-sm p-4 sm:p-6">
+            <h2 class="font-extrabold">Ringkasan Jadwal</h2>
+
+            <div class="mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div class="text-xs font-extrabold text-slate-500">Tanggal Semai</div>
+                <div class="mt-1 text-sm font-bold text-slate-800">
+                  {{ jadwal.tanggal_semai.strftime('%d %B %Y') if jadwal.tanggal_semai else '-' }}
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div class="text-xs font-extrabold text-slate-500">Tanggal Penyemaian</div>
+                <div class="mt-1 text-sm font-bold text-slate-800">
+                  {{ jadwal.tanggal_penyemaian.strftime('%d %B %Y') if jadwal.tanggal_penyemaian else '-' }}
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div class="text-xs font-extrabold text-slate-500">Tanggal Penanaman</div>
+                <div class="mt-1 text-sm font-bold text-slate-800">
+                  {{ jadwal.tanggal_penanaman.strftime('%d %B %Y') if jadwal.tanggal_penanaman else '-' }}
+                </div>
+              </div>
+
+              {% if jadwal.tanggal_pemupukan_1 %}
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div class="text-xs font-extrabold text-slate-500">Tanggal Pemupukan 1</div>
+                  <div class="mt-1 text-sm font-bold text-slate-800">
+                    {{ jadwal.tanggal_pemupukan_1.strftime('%d %B %Y') }}
+                  </div>
+                </div>
+              {% endif %}
+
+              {% if jadwal.tanggal_pemupukan_2 %}
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div class="text-xs font-extrabold text-slate-500">Tanggal Pemupukan 2</div>
+                  <div class="mt-1 text-sm font-bold text-slate-800">
+                    {{ jadwal.tanggal_pemupukan_2.strftime('%d %B %Y') }}
+                  </div>
+                </div>
+              {% endif %}
+
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div class="text-xs font-extrabold text-slate-500">Tanggal Panen</div>
+                <div class="mt-1 text-sm font-bold text-slate-800">
+                  {{ jadwal.tanggal_panen.strftime('%d %B %Y') if jadwal.tanggal_panen else '-' }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        {% else %}
+
+          <!-- =======================
+               MODE LIST SCHEDULE
+          ======================== -->
+
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+                Kelola Jadwal Tanam
+              </h1>
+              <p class="mt-2 text-sm text-emerald-700">
+                Lihat daftar jadwal yang sudah dibuat atau tambahkan schedule baru.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onclick="showCreateForm()"
+              class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-extrabold text-white hover:brightness-95 active:scale-[0.99] transition shadow-sm"
+            >
+              <i class="fa-solid fa-plus"></i>
+              Tambah Schedule
+            </button>
+          </div>
+
+          <div class="mt-4 sm:mt-5 h-px bg-slate-200"></div>
+
+          <!-- FORM TAMBAH SCHEDULE -->
+          <section
+            id="createScheduleSection"
+            class="mt-5 rounded-2xl bg-white border border-slate-200 shadow-sm p-4 sm:p-6 {% if schedules %}hidden{% endif %}"
+          >
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+              <div class="flex items-center gap-2">
+                <div class="h-9 w-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-calendar-plus text-emerald-600"></i>
+                </div>
+
+                <div>
+                  <h2 class="font-extrabold">Buat Rencana Tanam Baru</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Pilih varietas dan tanggal awal penyemaian untuk membuat schedule.
+                  </p>
+                </div>
+              </div>
+
+              {% if schedules %}
+                <button
+                  type="button"
+                  onclick="hideCreateForm()"
+                  class="h-9 w-9 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition"
+                  aria-label="Tutup form"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              {% endif %}
+            </div>
+
+            <form method="POST" class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="space-y-2">
+                <label class="text-xs font-extrabold text-slate-700">Varietas Padi</label>
+                <select
+                  name="varietas_id"
+                  class="h-11 w-full rounded-xl border border-emerald-200 bg-white px-4 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  required
+                >
+                  <option value="">Pilih varietas padi</option>
+                  {% for varietas in varietas_list %}
+                    <option value="{{ varietas.id }}">
+                      {{ varietas.nama }} ({{ varietas.hari_panen }} hari)
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-extrabold text-slate-700">Tanggal Awal Penyemaian</label>
+                <div class="relative">
+                  <input
+                    type="date"
+                    name="tanggal_semai"
+                    value=""
+                    class="h-11 w-full rounded-xl border border-emerald-200 bg-white px-4 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    required
+                  />
+                  <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <i class="fa-regular fa-calendar"></i>
+                  </span>
+                </div>
+              </div>
+
+              <div class="flex items-end">
+                <button
+                  type="submit"
+                  class="w-full rounded-xl bg-emerald-500 py-3 text-sm font-extrabold text-white hover:brightness-95 active:scale-[0.99] transition"
+                >
+                  Buat Rencana
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <!-- LIST SCHEDULE FULL PAGE -->
+          <section class="mt-5 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h2 class="font-extrabold">Ringkasan List Jadwal</h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Klik salah satu schedule untuk membuka detail jadwal tanam.
+                </p>
+              </div>
+
+              <div class="text-xs font-extrabold text-emerald-600">
+                Total: {{ schedules|length }} schedule
+              </div>
+            </div>
+
+            <div class="p-4 sm:p-6">
+              {% if schedules %}
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {% for item in schedules %}
+                    <a
+                      href="{{ url_for('auth.jadwal_user', jadwal_id=item.id) }}"
+                      class="group block rounded-2xl border border-slate-200 bg-white p-4 hover:bg-emerald-50 hover:border-emerald-300 transition shadow-sm"
+                    >
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <div class="text-base font-extrabold text-slate-900 truncate">
+                            {{ item.varietas.nama if item.varietas else 'Schedule Tanam' }}
+                          </div>
+
+                          <div class="mt-1 text-xs text-slate-500">
+                            Dibuat:
+                            {{ item.created_at.strftime('%d %b %Y') if item.created_at else '-' }}
+                          </div>
+                        </div>
+
+                        <span class="shrink-0 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition">
+                          <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </span>
+                      </div>
+
+                      <div class="mt-4 grid grid-cols-2 gap-3">
+                        <div class="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                          <div class="text-[10px] font-extrabold text-slate-400 uppercase">
+                            Semai
+                          </div>
+                          <div class="mt-1 text-xs font-extrabold text-slate-700">
+                            {{ item.tanggal_semai.strftime('%d %b %Y') if item.tanggal_semai else '-' }}
+                          </div>
+                        </div>
+
+                        <div class="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                          <div class="text-[10px] font-extrabold text-slate-400 uppercase">
+                            Panen
+                          </div>
+                          <div class="mt-1 text-xs font-extrabold text-slate-700">
+                            {{ item.tanggal_panen.strftime('%d %b %Y') if item.tanggal_panen else '-' }}
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 sm:p-10 text-center">
+                  <div class="mx-auto h-16 w-16 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                    <i class="fa-solid fa-seedling text-emerald-600 text-2xl"></i>
+                  </div>
+
+                  <h3 class="mt-4 text-lg font-extrabold text-slate-800">
+                    Belum ada schedule tanam
+                  </h3>
+
+                  <p class="mt-2 text-sm text-slate-500 max-w-md mx-auto">
+                    Klik tombol Tambah Schedule, lalu isi varietas dan tanggal awal penyemaian.
+                  </p>
+                </div>
+              {% endif %}
+            </div>
+          </section>
+
+        {% endif %}
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('sidebar-overlay').classList.add('active');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('active');
+    }
+
+    function showCreateForm() {
+      const section = document.getElementById("createScheduleSection");
+
+      if (section) {
+        section.classList.remove("hidden");
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function hideCreateForm() {
+      const section = document.getElementById("createScheduleSection");
+
+      if (section) {
+        section.classList.add("hidden");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const flashMessages = document.querySelectorAll(".flash-message");
+
+      flashMessages.forEach((msg, index) => {
+        setTimeout(() => {
+          msg.classList.add("translate-x-0", "opacity-100");
+        }, index * 100);
+
+        setTimeout(() => {
+          msg.classList.add("opacity-0", "translate-x-10");
+
+          setTimeout(() => {
+            msg.remove();
+          }, 500);
+        }, 3000);
+
+        msg.addEventListener("click", () => {
+          msg.remove();
+        });
+      });
+    });
+  </script>
+</body>
+</html>
