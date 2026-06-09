@@ -1,5 +1,5 @@
 from utils.disease_info import disease_info
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, flash
 from config import Config
 from extensions import db, login_manager
 from routes.auth import auth
@@ -311,6 +311,183 @@ def deteksi():
         active="deteksi"
     )
 
+# =======================
+# ROUTE DETEKSI ADMIN
+# =======================
+@app.route("/admin/deteksi", methods=["GET", "POST"])
+@login_required
+def deteksi_admin():
+    if current_user.role != "admin":
+        flash("Anda tidak memiliki akses ke halaman admin.", "error")
+        return redirect(url_for("deteksi"))
 
+    prediction = None
+    prediction_indo = None
+    confidence = None
+    desc = None
+    solution = []
+    img_path = None
+    error = None
+
+    if request.method == "POST":
+        file = request.files.get("file")
+
+        if not file or file.filename == "":
+            error = "Silakan pilih gambar terlebih dahulu."
+        else:
+            allowed_ext = {"png", "jpg", "jpeg"}
+            filename = secure_filename(file.filename)
+            ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+            if ext not in allowed_ext:
+                error = "Format file harus JPG, JPEG, atau PNG."
+            else:
+                upload_folder = os.path.join("static", "uploads")
+                os.makedirs(upload_folder, exist_ok=True)
+
+                unique_name = f"{uuid.uuid4().hex}.{ext}"
+                file_path = os.path.join(upload_folder, unique_name)
+                file.save(file_path)
+
+                img_path = f"/static/uploads/{unique_name}"
+
+                try:
+                    prediction, confidence, raw_pred = predict_disease(file_path)
+
+                    prediction_indo = display_names.get(prediction, prediction)
+
+                    if prediction == "Bukan Padi":
+                        desc = "Gambar yang Anda upload bukan daun padi."
+                        solution = ["Silakan upload gambar daun padi yang jelas."]
+
+                    elif prediction == "Tidak Yakin":
+                        desc = "Model belum cukup yakin terhadap hasil prediksi gambar ini."
+                        solution = [
+                            "Gunakan gambar daun padi yang lebih jelas.",
+                            "Pastikan daun terlihat fokus.",
+                            "Gunakan pencahayaan yang cukup.",
+                            "Hindari gambar buram atau terlalu jauh."
+                        ]
+
+                    else:
+                        info = disease_info.get(prediction)
+
+                        if info:
+                            desc = info.get("desc")
+                            solution = info.get("solution", [])
+                        else:
+                            desc = "Informasi penyakit belum tersedia."
+                            solution = []
+
+                    # Simpan hasil deteksi sebagai riwayat milik admin yang sedang login
+                    history = RiwayatDeteksi(
+                        user_id=current_user.id,
+                        image_path=img_path,
+                        hasil=prediction,
+                        confidence=confidence,
+                        deskripsi=desc
+                    )
+
+                    db.session.add(history)
+                    db.session.commit()
+
+                except Exception as e:
+                    error = f"Terjadi kesalahan saat prediksi: {str(e)}"
+
+    return render_template(
+        "deteksi_admin.html",
+        prediction=prediction,
+        prediction_indo=prediction_indo,
+        confidence=round(confidence, 2) if confidence is not None else None,
+        desc=desc,
+        solution=solution,
+        img_path=img_path,
+        error=error,
+        active="deteksi_admin"
+    )
+
+
+# =======================
+# ROUTE RIWAYAT ADMIN
+# =======================
+@app.route("/admin/riwayat")
+@login_required
+def riwayat_admin():
+    if current_user.role != "admin":
+        flash("Anda tidak memiliki akses ke halaman admin.", "error")
+        return redirect(url_for("deteksi"))
+
+    # Hanya menampilkan riwayat deteksi milik admin yang sedang login
+    histories = RiwayatDeteksi.query.filter_by(
+        user_id=current_user.id
+    ).order_by(
+        RiwayatDeteksi.id.desc()
+    ).all()
+
+    return render_template(
+        "riwayat_admin.html",
+        histories=histories,
+        active="riwayat_admin"
+    )
+
+
+# =======================
+# ROUTE HAPUS SATU RIWAYAT ADMIN
+# =======================
+@app.route("/admin/riwayat/hapus/<int:id>", methods=["POST"])
+@login_required
+def hapus_riwayat_admin(id):
+    if current_user.role != "admin":
+        flash("Anda tidak memiliki akses ke halaman admin.", "error")
+        return redirect(url_for("deteksi"))
+
+    # Admin hanya boleh menghapus riwayat miliknya sendiri
+    riwayat = RiwayatDeteksi.query.filter_by(
+        id=id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    if riwayat.image_path:
+        image_file = riwayat.image_path.lstrip("/")
+
+        if os.path.exists(image_file):
+            os.remove(image_file)
+
+    db.session.delete(riwayat)
+    db.session.commit()
+
+    flash("Riwayat deteksi admin berhasil dihapus.", "success")
+    return redirect(url_for("riwayat_admin"))
+
+
+# =======================
+# ROUTE HAPUS SEMUA RIWAYAT ADMIN
+# =======================
+@app.route("/admin/riwayat/hapus-semua", methods=["POST"])
+@login_required
+def hapus_semua_riwayat_admin():
+    if current_user.role != "admin":
+        flash("Anda tidak memiliki akses ke halaman admin.", "error")
+        return redirect(url_for("deteksi"))
+
+    # Hanya menghapus semua riwayat milik admin yang sedang login
+    histories = RiwayatDeteksi.query.filter_by(
+        user_id=current_user.id
+    ).all()
+
+    for item in histories:
+        if item.image_path:
+            image_file = item.image_path.lstrip("/")
+
+            if os.path.exists(image_file):
+                os.remove(image_file)
+
+        db.session.delete(item)
+
+    db.session.commit()
+
+    flash("Semua riwayat deteksi admin berhasil dihapus.", "success")
+    return redirect(url_for("riwayat_admin"))
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False)

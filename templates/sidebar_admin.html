@@ -19,6 +19,26 @@
     <span class="font-semibold text-sm">Beranda</span>
   </a>
 
+  <!-- DETEKSI PENYAKIT -->
+  <a href="{{ url_for('deteksi_admin') }}"
+     class="flex items-center gap-3 px-4 py-3 rounded-xl
+     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'deteksi_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+    <i class="fa-solid fa-magnifying-glass-chart w-5
+       {{ 'text-white' if active == 'deteksi_admin' else 'text-emerald-500' }}">
+    </i>
+    <span class="font-semibold text-sm">Deteksi Penyakit</span>
+  </a>
+
+  <!-- RIWAYAT DETEKSI -->
+  <a href="{{ url_for('riwayat_admin') }}"
+     class="flex items-center gap-3 px-4 py-3 rounded-xl
+     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'riwayat_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+    <i class="fa-solid fa-clock-rotate-left w-5
+       {{ 'text-white' if active == 'riwayat_admin' else 'text-emerald-500' }}">
+    </i>
+    <span class="font-semibold text-sm">Riwayat Deteksi</span>
+  </a>
+
   <!-- KELOLA AKUN -->
   <a href="{{ url_for('auth.users') }}"
      class="flex items-center gap-3 px-4 py-3 rounded-xl
