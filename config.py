@@ -2,11 +2,15 @@ import os
 from datetime import timedelta
 
 class Config:
-    # Saat server di-run ulang, session lama otomatis tidak valid
-    SECRET_KEY = os.environ.get("SECRET_KEY") or os.urandom(24)
+    SECRET_KEY = os.getenv("SECRET_KEY")
 
-    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:@localhost/padi_db"
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        "mysql+pymysql://flask_user:flask_password@mysql_db:3306/flask_db"
+    )
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 
     SESSION_PERMANENT = False
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)

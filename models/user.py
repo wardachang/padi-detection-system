@@ -1,5 +1,6 @@
 from extensions import db
 from flask_login import UserMixin
+from .kelompok_tani import user_kelompok_tani
 
 
 class User(db.Model, UserMixin):
@@ -13,3 +14,9 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.Enum("user", "admin"), nullable=False, default="user")
     is_active = db.Column(db.Boolean, default=True)
+
+    kelompok_tani_list = db.relationship(
+        "KelompokTani",
+        secondary=user_kelompok_tani,
+        back_populates="anggota"
+    )

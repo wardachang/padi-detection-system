@@ -59,6 +59,26 @@
     <span class="font-semibold text-sm">Varietas Padi</span>
   </a>
 
+  <!-- KELOMPOK TANI -->
+  <a href="{{ url_for('auth.kelompok_tani_admin') }}"
+     class="flex items-center gap-3 px-4 py-3 rounded-xl
+     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'kelompok_tani_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+    <i class="fa-solid fa-people-group w-5
+       {{ 'text-white' if active == 'kelompok_tani_admin' else 'text-emerald-500' }}">
+    </i>
+    <span class="font-semibold text-sm">Kelompok Tani</span>
+  </a>
+
+  <!-- JADWAL PETANI -->
+  <a href="{{ url_for('auth.admin_jadwal_petani') }}"
+     class="flex items-center gap-3 px-4 py-3 rounded-xl
+     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'jadwal_petani_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+    <i class="fa-solid fa-calendar-days w-5
+       {{ 'text-white' if active == 'jadwal_petani_admin' else 'text-emerald-500' }}">
+    </i>
+    <span class="font-semibold text-sm">Jadwal Petani</span>
+  </a>
+
   <!-- PROFIL ADMIN -->
   <a href="{{ url_for('auth.profile_admin') }}"
      class="flex items-center gap-3 px-4 py-3 rounded-xl
@@ -106,11 +126,11 @@
 
     <!-- KANAN: LOGOUT -->
     {% if current_user.is_authenticated %}
-    <a href="{{ url_for('auth.logout') }}"
-       class="ml-3 text-slate-500 hover:text-red-500 transition shrink-0"
-       title="Logout">
-      <i class="fa-solid fa-right-from-bracket text-lg"></i>
-    </a>
+      <a href="{{ url_for('auth.logout') }}"
+         class="ml-3 text-slate-500 hover:text-red-500 transition shrink-0"
+         title="Logout">
+        <i class="fa-solid fa-right-from-bracket text-lg"></i>
+      </a>
     {% endif %}
 
   </div>

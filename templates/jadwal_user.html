@@ -179,6 +179,13 @@
                   Semai:
                   {{ jadwal.tanggal_semai.strftime('%d %B %Y') if jadwal.tanggal_semai else '-' }}
                 </p>
+
+                <p class="mt-1 text-sm text-slate-500">
+                  Kelompok Tani:
+                  <span class="font-bold text-slate-700">
+                    {{ jadwal.kelompok_tani.nama if jadwal.kelompok_tani else '-' }}
+                  </span>
+                </p>
               </div>
 
               <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
@@ -282,6 +289,14 @@
             <h2 class="font-extrabold">Ringkasan Jadwal</h2>
 
             <div class="mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div class="text-xs font-extrabold text-slate-500">Kelompok Tani</div>
+                <div class="mt-1 text-sm font-bold text-slate-800">
+                  {{ jadwal.kelompok_tani.nama if jadwal.kelompok_tani else '-' }}
+                </div>
+              </div>
+
               <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div class="text-xs font-extrabold text-slate-500">Tanggal Semai</div>
                 <div class="mt-1 text-sm font-bold text-slate-800">
@@ -358,190 +373,200 @@
 
           <div class="mt-4 sm:mt-5 h-px bg-slate-200"></div>
 
-         <!-- LIST SCHEDULE DALAM BENTUK TABEL -->
-        <section class="mt-5 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
-          <div class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div>
-              <h2 class="font-extrabold text-slate-900">
-                Ringkasan List Jadwal
-              </h2>
-              <p class="text-xs text-slate-500 mt-0.5">
-                Data jadwal tanam yang sudah dibuat oleh pengguna.
-              </p>
+          <!-- LIST SCHEDULE DALAM BENTUK TABEL -->
+          <section class="mt-5 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h2 class="font-extrabold text-slate-900">
+                  Ringkasan List Jadwal
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Data jadwal tanam yang sudah dibuat oleh pengguna.
+                </p>
+              </div>
+
+              <div class="text-xs font-extrabold text-emerald-600">
+                Total: {{ schedules|length }} schedule
+              </div>
             </div>
 
-            <div class="text-xs font-extrabold text-emerald-600">
-              Total: {{ schedules|length }} schedule
-            </div>
-          </div>
-
-          {% if schedules %}
-            <div class="overflow-x-auto">
-              <table class="w-full min-w-[850px] text-sm">
-                <thead class="bg-slate-50 border-b border-slate-200">
-                  <tr class="text-left">
-                    <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
-                      No
-                    </th>
-                    <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
-                      Jenis Varietas
-                    </th>
-                    <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
-                      Dibuat
-                    </th>
-                    <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
-                      Tanggal Semai
-                    </th>
-                    <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
-                      Tanggal Panen
-                    </th>
-                    <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500 text-center">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody class="divide-y divide-slate-100 bg-white">
-                  {% for item in schedules %}
-                    {% set schedule_name = item.varietas.nama if item.varietas else 'Schedule Tanam' %}
-
-                    <tr class="schedule-row hover:bg-slate-50 transition">
-                      <td class="px-5 py-4 font-semibold text-slate-500 whitespace-nowrap">
-                        {{ loop.index }}
-                      </td>
-
-                      <td class="px-5 py-4">
-                        <div class="flex items-center gap-3">
-                          <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-seedling text-emerald-600"></i>
-                          </div>
-
-                          <div>
-                            <div class="font-extrabold text-slate-900">
-                              {{ schedule_name }}
-                            </div>
-                            <div class="text-xs text-slate-500 mt-0.5">
-                              Schedule tanam padi
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td class="px-5 py-4 text-slate-600 whitespace-nowrap">
-                        {{ item.created_at.strftime('%d %b %Y') if item.created_at else '-' }}
-                      </td>
-
-                      <td class="px-5 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">
-                          {{ item.tanggal_semai.strftime('%d %b %Y') if item.tanggal_semai else '-' }}
-                        </span>
-                      </td>
-
-                      <td class="px-5 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
-                          {{ item.tanggal_panen.strftime('%d %b %Y') if item.tanggal_panen else '-' }}
-                        </span>
-                      </td>
-
-                      <td class="px-5 py-4">
-                        <div class="flex items-center justify-center gap-2">
-
-                          <!-- LIHAT DETAIL -->
-                          <a
-                            href="{{ url_for('auth.jadwal_user', jadwal_id=item.id) }}"
-                            class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 text-xs font-extrabold text-white hover:bg-emerald-600 transition"
-                          >
-                            <i class="fa-solid fa-eye"></i>
-                            Lihat Detail
-                          </a>
-
-                          <!-- HAPUS -->
-                          <form
-                            id="deleteScheduleForm{{ item.id }}"
-                            method="POST"
-                            action="{{ url_for('auth.hapus_jadwal_user', id=item.id) }}"
-                            class="inline"
-                          >
-                            <button
-                              type="button"
-                              data-schedule-name="{{ schedule_name|e }}"
-                              onclick="openDeleteScheduleModal('deleteScheduleForm{{ item.id }}', this.dataset.scheduleName)"
-                              class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 text-xs font-extrabold text-white hover:bg-red-600 transition"
-                            >
-                              <i class="fa-solid fa-trash"></i>
-                              Hapus
-                            </button>
-                          </form>
-
-                        </div>
-                      </td>
+            {% if schedules %}
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-[980px] text-sm">
+                  <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr class="text-left">
+                      <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
+                        No
+                      </th>
+                      <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
+                        Jenis Varietas
+                      </th>
+                      <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
+                        Kelompok Tani
+                      </th>
+                      <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
+                        Dibuat
+                      </th>
+                      <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
+                        Tanggal Semai
+                      </th>
+                      <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
+                        Tanggal Panen
+                      </th>
+                      <th class="px-5 py-4 text-[11px] uppercase tracking-widest font-extrabold text-slate-500 text-center">
+                        Aksi
+                      </th>
                     </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-                        <!-- PAGINATION JADWAL -->
-            <div
-              id="schedule-pagination-wrapper"
-              class="px-5 py-4 border-t border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-            >
+                  </thead>
+
+                  <tbody class="divide-y divide-slate-100 bg-white">
+                    {% for item in schedules %}
+                      {% set schedule_name = item.varietas.nama if item.varietas else 'Schedule Tanam' %}
+
+                      <tr class="schedule-row hover:bg-slate-50 transition">
+                        <td class="px-5 py-4 font-semibold text-slate-500 whitespace-nowrap">
+                          {{ loop.index }}
+                        </td>
+
+                        <td class="px-5 py-4">
+                          <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                              <i class="fa-solid fa-seedling text-emerald-600"></i>
+                            </div>
+
+                            <div>
+                              <div class="font-extrabold text-slate-900">
+                                {{ schedule_name }}
+                              </div>
+                              <div class="text-xs text-slate-500 mt-0.5">
+                                Schedule tanam padi
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td class="px-5 py-4 whitespace-nowrap">
+                          <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-extrabold text-blue-700">
+                            {{ item.kelompok_tani.nama if item.kelompok_tani else '-' }}
+                          </span>
+                        </td>
+
+                        <td class="px-5 py-4 text-slate-600 whitespace-nowrap">
+                          {{ item.created_at.strftime('%d %b %Y') if item.created_at else '-' }}
+                        </td>
+
+                        <td class="px-5 py-4 whitespace-nowrap">
+                          <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">
+                            {{ item.tanggal_semai.strftime('%d %b %Y') if item.tanggal_semai else '-' }}
+                          </span>
+                        </td>
+
+                        <td class="px-5 py-4 whitespace-nowrap">
+                          <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
+                            {{ item.tanggal_panen.strftime('%d %b %Y') if item.tanggal_panen else '-' }}
+                          </span>
+                        </td>
+
+                        <td class="px-5 py-4">
+                          <div class="flex items-center justify-center gap-2">
+
+                            <!-- LIHAT DETAIL -->
+                            <a
+                              href="{{ url_for('auth.jadwal_user', jadwal_id=item.id) }}"
+                              class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 text-xs font-extrabold text-white hover:bg-emerald-600 transition"
+                            >
+                              <i class="fa-solid fa-eye"></i>
+                              Lihat Detail
+                            </a>
+
+                            <!-- HAPUS -->
+                            <form
+                              id="deleteScheduleForm{{ item.id }}"
+                              method="POST"
+                              action="{{ url_for('auth.hapus_jadwal_user', id=item.id) }}"
+                              class="inline"
+                            >
+                              <button
+                                type="button"
+                                data-schedule-name="{{ schedule_name|e }}"
+                                onclick="openDeleteScheduleModal('deleteScheduleForm{{ item.id }}', this.dataset.scheduleName)"
+                                class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 text-xs font-extrabold text-white hover:bg-red-600 transition"
+                              >
+                                <i class="fa-solid fa-trash"></i>
+                                Hapus
+                              </button>
+                            </form>
+
+                          </div>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- PAGINATION JADWAL -->
               <div
-                id="schedule-pagination-info"
-                class="text-xs font-semibold text-slate-500"
-              ></div>
-
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  id="schedule-prev-page"
-                  onclick="changeSchedulePage(-1)"
-                  class="h-9 px-3 rounded-lg border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition"
-                >
-                  <i class="fa-solid fa-chevron-left mr-1"></i>
-                  Sebelumnya
-                </button>
-
+                id="schedule-pagination-wrapper"
+                class="px-5 py-4 border-t border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+              >
                 <div
-                  id="schedule-page-numbers"
-                  class="flex items-center gap-1"
+                  id="schedule-pagination-info"
+                  class="text-xs font-semibold text-slate-500"
                 ></div>
 
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    id="schedule-prev-page"
+                    onclick="changeSchedulePage(-1)"
+                    class="h-9 px-3 rounded-lg border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition"
+                  >
+                    <i class="fa-solid fa-chevron-left mr-1"></i>
+                    Sebelumnya
+                  </button>
+
+                  <div
+                    id="schedule-page-numbers"
+                    class="flex items-center gap-1"
+                  ></div>
+
+                  <button
+                    type="button"
+                    id="schedule-next-page"
+                    onclick="changeSchedulePage(1)"
+                    class="h-9 px-3 rounded-lg border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition"
+                  >
+                    Berikutnya
+                    <i class="fa-solid fa-chevron-right ml-1"></i>
+                  </button>
+                </div>
+              </div>
+            {% else %}
+              <div class="p-8 sm:p-10 text-center">
+                <div class="mx-auto h-16 w-16 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                  <i class="fa-solid fa-seedling text-emerald-600 text-2xl"></i>
+                </div>
+
+                <h3 class="mt-4 text-lg font-extrabold text-slate-800">
+                  Belum ada schedule tanam
+                </h3>
+
+                <p class="mt-2 text-sm text-slate-500 max-w-md mx-auto">
+                  Klik tombol Tambah Schedule, lalu isi varietas, kelompok tani, dan tanggal awal penyemaian.
+                </p>
+
                 <button
                   type="button"
-                  id="schedule-next-page"
-                  onclick="changeSchedulePage(1)"
-                  class="h-9 px-3 rounded-lg border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition"
+                  onclick="showCreateForm()"
+                  class="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-extrabold text-white hover:bg-emerald-600 transition"
                 >
-                  Berikutnya
-                  <i class="fa-solid fa-chevron-right ml-1"></i>
+                  <i class="fa-solid fa-plus"></i>
+                  Tambah Schedule
                 </button>
               </div>
-            </div>
-          {% else %}
-            <div class="p-8 sm:p-10 text-center">
-              <div class="mx-auto h-16 w-16 rounded-2xl bg-emerald-100 flex items-center justify-center">
-                <i class="fa-solid fa-seedling text-emerald-600 text-2xl"></i>
-              </div>
-
-              <h3 class="mt-4 text-lg font-extrabold text-slate-800">
-                Belum ada schedule tanam
-              </h3>
-
-              <p class="mt-2 text-sm text-slate-500 max-w-md mx-auto">
-                Klik tombol Tambah Schedule, lalu isi varietas dan tanggal awal penyemaian.
-              </p>
-
-              <button
-                type="button"
-                onclick="showCreateForm()"
-                class="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-extrabold text-white hover:bg-emerald-600 transition"
-              >
-                <i class="fa-solid fa-plus"></i>
-                Tambah Schedule
-              </button>
-            </div>
-          {% endif %}
-        </section>
+            {% endif %}
+          </section>
 
         {% endif %}
 
@@ -550,114 +575,139 @@
   </div>
 
   <!-- MODAL TAMBAH SCHEDULE -->
-<div
-  id="createScheduleModal"
-  class="fixed inset-0 z-[9998] hidden items-center justify-center bg-black/40 p-4"
->
-  <div class="w-full max-w-2xl rounded-3xl bg-white shadow-2xl overflow-hidden">
+  <div
+    id="createScheduleModal"
+    class="fixed inset-0 z-[9998] hidden items-center justify-center bg-black/40 p-4"
+  >
+    <div class="w-full max-w-3xl rounded-3xl bg-white shadow-2xl overflow-hidden">
 
-    <!-- Header -->
-    <div class="px-6 py-5 border-b border-slate-100 flex items-start justify-between gap-4">
-      <div class="flex items-start gap-3">
-        <div class="h-11 w-11 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
-          <i class="fa-solid fa-calendar-plus text-emerald-600"></i>
-        </div>
-
-        <div>
-          <h2 class="text-xl font-extrabold text-slate-900">
-            Buat Rencana Tanam Baru
-          </h2>
-          <p class="mt-1 text-sm text-slate-500">
-            Pilih varietas padi dan tanggal awal penyemaian untuk membuat jadwal tanam.
-          </p>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onclick="hideCreateForm()"
-        class="h-10 w-10 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition"
-      >
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-
-    <!-- Body -->
-    <form method="POST" action="{{ url_for('auth.jadwal_user') }}">
-      <div class="p-6 space-y-5">
-
-        <!-- Info Box -->
-        <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 flex gap-3">
-          <div class="h-9 w-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-            <i class="fa-solid fa-circle-info text-emerald-600"></i>
+      <!-- Header -->
+      <div class="px-6 py-5 border-b border-slate-100 flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <div class="h-11 w-11 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-calendar-plus text-emerald-600"></i>
           </div>
 
           <div>
-            <div class="text-sm font-extrabold text-emerald-800">
-              Informasi Schedule
-            </div>
-            <p class="mt-1 text-xs leading-5 text-emerald-700">
-              Sistem akan menghitung tanggal penyemaian, penanaman, pemupukan, dan panen berdasarkan varietas yang dipilih.
+            <h2 class="text-xl font-extrabold text-slate-900">
+              Buat Rencana Tanam Baru
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Pilih varietas padi, kelompok tani, dan tanggal awal penyemaian untuk membuat jadwal tanam.
             </p>
           </div>
         </div>
 
-        <!-- Form Fields -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block mb-2 text-xs font-extrabold uppercase tracking-widest text-slate-500">
-              Varietas Padi
-            </label>
-            <select
-              name="varietas_id"
-              class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-              required
-            >
-              <option value="">Pilih varietas padi</option>
-              {% for varietas in varietas_list %}
-                <option value="{{ varietas.id }}">
-                  {{ varietas.nama }} - {{ varietas.hari_panen }} hari
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <div>
-            <label class="block mb-2 text-xs font-extrabold uppercase tracking-widest text-slate-500">
-              Tanggal Awal Penyemaian
-            </label>
-            <input
-              type="date"
-              name="tanggal_semai"
-              class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-              required
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="px-6 py-5 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-end gap-3">
         <button
           type="button"
           onclick="hideCreateForm()"
-          class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-700 hover:bg-slate-50 transition"
+          class="h-10 w-10 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition"
         >
-          Batal
-        </button>
-
-        <button
-          type="submit"
-          class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-extrabold text-white hover:bg-emerald-600 transition"
-        >
-          <i class="fa-solid fa-floppy-disk"></i>
-          Simpan Schedule
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-    </form>
 
+      <!-- Body -->
+      <form method="POST" action="{{ url_for('auth.jadwal_user') }}">
+        <div class="p-6 space-y-5">
+
+          <!-- Info Box -->
+          <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 flex gap-3">
+            <div class="h-9 w-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-circle-info text-emerald-600"></i>
+            </div>
+
+            <div>
+              <div class="text-sm font-extrabold text-emerald-800">
+                Informasi Schedule
+              </div>
+              <p class="mt-1 text-xs leading-5 text-emerald-700">
+                Sistem akan menghitung tanggal penyemaian, penanaman, pemupukan, dan panen berdasarkan varietas yang dipilih.
+              </p>
+            </div>
+          </div>
+
+          <!-- Form Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block mb-2 text-xs font-extrabold uppercase tracking-widest text-slate-500">
+                Varietas Padi
+              </label>
+              <select
+                name="varietas_id"
+                class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                required
+              >
+                <option value="">Pilih varietas padi</option>
+                {% for varietas in varietas_list %}
+                  <option value="{{ varietas.id }}">
+                    {{ varietas.nama }} - {{ varietas.hari_panen }} hari
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block mb-2 text-xs font-extrabold uppercase tracking-widest text-slate-500">
+                Kelompok Tani
+              </label>
+
+              <select
+                name="kelompok_tani_id"
+                class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                required
+              >
+                <option value="">Pilih kelompok tani</option>
+                {% for kelompok in kelompok_tani_list %}
+                  <option value="{{ kelompok.id }}">
+                    {{ kelompok.nama }}
+                  </option>
+                {% endfor %}
+              </select>
+
+              {% if kelompok_tani_list|length == 0 %}
+                <p class="mt-2 text-xs font-semibold text-red-500">
+                  Kamu belum terdaftar pada kelompok tani mana pun.
+                </p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label class="block mb-2 text-xs font-extrabold uppercase tracking-widest text-slate-500">
+                Tanggal Awal Penyemaian
+              </label>
+              <input
+                type="date"
+                name="tanggal_semai"
+                class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-5 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-end gap-3">
+          <button
+            type="button"
+            onclick="hideCreateForm()"
+            class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-700 hover:bg-slate-50 transition"
+          >
+            Batal
+          </button>
+
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-extrabold text-white hover:bg-emerald-600 transition"
+          >
+            <i class="fa-solid fa-floppy-disk"></i>
+            Simpan Schedule
+          </button>
+        </div>
+      </form>
+
+    </div>
   </div>
-</div>
 
   <!-- MODAL KONFIRMASI HAPUS JADWAL -->
   <div
@@ -704,201 +754,200 @@
   </div>
 
   <script>
-  function openSidebar() {
-    document.getElementById('sidebar').classList.add('open');
-    document.getElementById('sidebar-overlay').classList.add('active');
-  }
-
-  function closeSidebar() {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('sidebar-overlay').classList.remove('active');
-  }
-
-  function showCreateForm() {
-    const modal = document.getElementById("createScheduleModal");
-
-    if (modal) {
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('sidebar-overlay').classList.add('active');
     }
-  }
 
-  function hideCreateForm() {
-    const modal = document.getElementById("createScheduleModal");
-
-    if (modal) {
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('active');
     }
-  }
 
-  window.addEventListener("DOMContentLoaded", () => {
-    const flashMessages = document.querySelectorAll(".flash-message");
+    function showCreateForm() {
+      const modal = document.getElementById("createScheduleModal");
 
-    flashMessages.forEach((msg, index) => {
-      setTimeout(() => {
-        msg.classList.add("translate-x-0", "opacity-100");
-      }, index * 100);
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
 
-      setTimeout(() => {
-        msg.classList.add("opacity-0", "translate-x-10");
+    function hideCreateForm() {
+      const modal = document.getElementById("createScheduleModal");
+
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const flashMessages = document.querySelectorAll(".flash-message");
+
+      flashMessages.forEach((msg, index) => {
+        setTimeout(() => {
+          msg.classList.add("translate-x-0", "opacity-100");
+        }, index * 100);
 
         setTimeout(() => {
-          msg.remove();
-        }, 500);
-      }, 3000);
+          msg.classList.add("opacity-0", "translate-x-10");
 
-      msg.addEventListener("click", () => {
-        msg.remove();
+          setTimeout(() => {
+            msg.remove();
+          }, 500);
+        }, 3000);
+
+        msg.addEventListener("click", () => {
+          msg.remove();
+        });
       });
+
+      renderSchedulePagination();
     });
 
-    renderSchedulePagination();
-  });
+    let selectedDeleteScheduleFormId = null;
 
-  let selectedDeleteScheduleFormId = null;
+    function openDeleteScheduleModal(formId, scheduleName) {
+      selectedDeleteScheduleFormId = formId;
 
-  function openDeleteScheduleModal(formId, scheduleName) {
-    selectedDeleteScheduleFormId = formId;
+      const modal = document.getElementById("deleteScheduleModal");
+      const nameTarget = document.getElementById("deleteScheduleName");
 
-    const modal = document.getElementById("deleteScheduleModal");
-    const nameTarget = document.getElementById("deleteScheduleName");
+      if (nameTarget) {
+        nameTarget.textContent = scheduleName;
+      }
 
-    if (nameTarget) {
-      nameTarget.textContent = scheduleName;
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
     }
 
-    if (modal) {
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    }
-  }
+    function closeDeleteScheduleModal() {
+      const modal = document.getElementById("deleteScheduleModal");
 
-  function closeDeleteScheduleModal() {
-    const modal = document.getElementById("deleteScheduleModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
 
-    if (modal) {
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
+      selectedDeleteScheduleFormId = null;
     }
 
-    selectedDeleteScheduleFormId = null;
-  }
-
-  function submitDeleteSchedule() {
-    if (selectedDeleteScheduleFormId) {
-      document.getElementById(selectedDeleteScheduleFormId).submit();
+    function submitDeleteSchedule() {
+      if (selectedDeleteScheduleFormId) {
+        document.getElementById(selectedDeleteScheduleFormId).submit();
+      }
     }
-  }
 
-  /* PAGINATION / SLIDE JADWAL */
-  const scheduleRows = Array.from(document.querySelectorAll(".schedule-row"));
-  const scheduleRowsPerPage = 3;
-  let scheduleCurrentPage = 1;
-  const scheduleTotalPages = Math.ceil(scheduleRows.length / scheduleRowsPerPage);
+    /* PAGINATION / SLIDE JADWAL */
+    const scheduleRows = Array.from(document.querySelectorAll(".schedule-row"));
+    const scheduleRowsPerPage = 3;
+    let scheduleCurrentPage = 1;
+    const scheduleTotalPages = Math.ceil(scheduleRows.length / scheduleRowsPerPage);
 
-  function renderSchedulePagination() {
-    if (scheduleRows.length === 0) return;
+    function renderSchedulePagination() {
+      if (scheduleRows.length === 0) return;
 
-    const wrapper = document.getElementById("schedule-pagination-wrapper");
-    const paginationInfo = document.getElementById("schedule-pagination-info");
-    const prevButton = document.getElementById("schedule-prev-page");
-    const nextButton = document.getElementById("schedule-next-page");
-    const pageNumbers = document.getElementById("schedule-page-numbers");
+      const wrapper = document.getElementById("schedule-pagination-wrapper");
+      const paginationInfo = document.getElementById("schedule-pagination-info");
+      const prevButton = document.getElementById("schedule-prev-page");
+      const nextButton = document.getElementById("schedule-next-page");
+      const pageNumbers = document.getElementById("schedule-page-numbers");
 
-    if (scheduleTotalPages <= 1) {
-      scheduleRows.forEach((row) => {
-        row.style.display = "";
-      });
+      if (scheduleTotalPages <= 1) {
+        scheduleRows.forEach((row) => {
+          row.style.display = "";
+        });
+
+        if (wrapper) {
+          wrapper.classList.add("hidden");
+        }
+
+        return;
+      }
 
       if (wrapper) {
-        wrapper.classList.add("hidden");
+        wrapper.classList.remove("hidden");
       }
 
-      return;
+      const start = (scheduleCurrentPage - 1) * scheduleRowsPerPage;
+      const end = start + scheduleRowsPerPage;
+
+      scheduleRows.forEach((row, index) => {
+        row.style.display = index >= start && index < end ? "" : "none";
+      });
+
+      if (paginationInfo) {
+        paginationInfo.textContent =
+          `Menampilkan ${start + 1}-${Math.min(end, scheduleRows.length)} dari ${scheduleRows.length} jadwal`;
+      }
+
+      if (prevButton) {
+        prevButton.disabled = scheduleCurrentPage === 1;
+        prevButton.classList.toggle("opacity-50", scheduleCurrentPage === 1);
+        prevButton.classList.toggle("cursor-not-allowed", scheduleCurrentPage === 1);
+      }
+
+      if (nextButton) {
+        nextButton.disabled = scheduleCurrentPage === scheduleTotalPages;
+        nextButton.classList.toggle("opacity-50", scheduleCurrentPage === scheduleTotalPages);
+        nextButton.classList.toggle("cursor-not-allowed", scheduleCurrentPage === scheduleTotalPages);
+      }
+
+      if (pageNumbers) {
+        pageNumbers.innerHTML = "";
+
+        for (let i = 1; i <= scheduleTotalPages; i++) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = i;
+          button.onclick = () => goToSchedulePage(i);
+
+          button.className =
+            i === scheduleCurrentPage
+              ? "h-9 w-9 rounded-lg bg-emerald-500 text-white text-xs font-extrabold"
+              : "h-9 w-9 rounded-lg border border-slate-200 text-slate-600 text-xs font-extrabold hover:bg-slate-50 transition";
+
+          pageNumbers.appendChild(button);
+        }
+      }
     }
 
-    if (wrapper) {
-      wrapper.classList.remove("hidden");
+    function changeSchedulePage(direction) {
+      const nextPage = scheduleCurrentPage + direction;
+
+      if (nextPage < 1 || nextPage > scheduleTotalPages) return;
+
+      scheduleCurrentPage = nextPage;
+      renderSchedulePagination();
     }
 
-    const start = (scheduleCurrentPage - 1) * scheduleRowsPerPage;
-    const end = start + scheduleRowsPerPage;
+    function goToSchedulePage(page) {
+      scheduleCurrentPage = page;
+      renderSchedulePagination();
+    }
 
-    scheduleRows.forEach((row, index) => {
-      row.style.display = index >= start && index < end ? "" : "none";
+    document.addEventListener("click", function (e) {
+      const deleteModal = document.getElementById("deleteScheduleModal");
+      const createModal = document.getElementById("createScheduleModal");
+
+      if (e.target === deleteModal) {
+        closeDeleteScheduleModal();
+      }
+
+      if (e.target === createModal) {
+        hideCreateForm();
+      }
     });
 
-    if (paginationInfo) {
-      paginationInfo.textContent =
-        `Menampilkan ${start + 1}-${Math.min(end, scheduleRows.length)} dari ${scheduleRows.length} jadwal`;
-    }
-
-    if (prevButton) {
-      prevButton.disabled = scheduleCurrentPage === 1;
-      prevButton.classList.toggle("opacity-50", scheduleCurrentPage === 1);
-      prevButton.classList.toggle("cursor-not-allowed", scheduleCurrentPage === 1);
-    }
-
-    if (nextButton) {
-      nextButton.disabled = scheduleCurrentPage === scheduleTotalPages;
-      nextButton.classList.toggle("opacity-50", scheduleCurrentPage === scheduleTotalPages);
-      nextButton.classList.toggle("cursor-not-allowed", scheduleCurrentPage === scheduleTotalPages);
-    }
-
-    if (pageNumbers) {
-      pageNumbers.innerHTML = "";
-
-      for (let i = 1; i <= scheduleTotalPages; i++) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = i;
-        button.onclick = () => goToSchedulePage(i);
-
-        button.className =
-          i === scheduleCurrentPage
-            ? "h-9 w-9 rounded-lg bg-emerald-500 text-white text-xs font-extrabold"
-            : "h-9 w-9 rounded-lg border border-slate-200 text-slate-600 text-xs font-extrabold hover:bg-slate-50 transition";
-
-        pageNumbers.appendChild(button);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        closeDeleteScheduleModal();
+        hideCreateForm();
       }
-    }
-  }
-
-  function changeSchedulePage(direction) {
-    const nextPage = scheduleCurrentPage + direction;
-
-    if (nextPage < 1 || nextPage > scheduleTotalPages) return;
-
-    scheduleCurrentPage = nextPage;
-    renderSchedulePagination();
-  }
-
-  function goToSchedulePage(page) {
-    scheduleCurrentPage = page;
-    renderSchedulePagination();
-  }
-
-  document.addEventListener("click", function (e) {
-    const deleteModal = document.getElementById("deleteScheduleModal");
-    const createModal = document.getElementById("createScheduleModal");
-
-    if (e.target === deleteModal) {
-      closeDeleteScheduleModal();
-    }
-
-    if (e.target === createModal) {
-      hideCreateForm();
-    }
-  });
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      closeDeleteScheduleModal();
-      hideCreateForm();
-    }
-  });
-</script>
-  
+    });
+  </script>
 </body>
 </html>

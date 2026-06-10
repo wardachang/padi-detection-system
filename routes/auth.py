@@ -1,19 +1,40 @@
 import os
 import uuid
-
 import calendar
-from models.varietas_padi import VarietasPadi
-from models.jadwal_tanam import JadwalTanam
-from models.varietas_padi import VarietasPadi
+
 from datetime import datetime, date, timedelta
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
+
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    current_app,
+    session
+)
+
+from flask_login import (
+    current_user,
+    login_user,
+    logout_user,
+    login_required
+)
+
 from sqlalchemy import func, or_
-from models.user import User
-from models.riwayat_deteksi import RiwayatDeteksi
-from extensions import db
-from flask_login import current_user, login_user, logout_user, login_required
+from sqlalchemy.orm import joinedload
+
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+
+from extensions import db
+
+from models.user import User
+from models.riwayat_deteksi import RiwayatDeteksi
+from models.varietas_padi import VarietasPadi
+from models.jadwal_tanam import JadwalTanam
+from models.kelompok_tani import KelompokTani
 
 auth = Blueprint("auth", __name__)
 
@@ -26,6 +47,11 @@ ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+
+def admin_required_redirect():
+    flash("Akses ditolak.", "error")
+    return redirect(url_for("auth.dashboard"))
 
 
 # =======================
@@ -93,7 +119,7 @@ def register():
     if current_user.is_authenticated:
         if current_user.role == "admin":
             return redirect(url_for("auth.admin_dashboard"))
-        return redirect(url_for("deteksi"))
+        return redirect(url_for("auth.dashboard"))
 
     if request.method == "POST":
         fullname = request.form.get("fullname")
@@ -133,7 +159,6 @@ def register():
 # =======================
 # USER DASHBOARD
 # =======================
-
 def get_countdown_jadwal(jadwal):
     today = date.today()
 
@@ -162,37 +187,30 @@ def get_countdown_jadwal(jadwal):
 
     return "Semua tahapan selesai"
 
+
 @auth.route("/dashboard")
 @login_required
 def dashboard():
-    # =========================
-    # RIWAYAT DETEKSI
-    # =========================
-    histories = RiwayatDeteksi.query.filter_by(user_id=current_user.id) \
-        .order_by(RiwayatDeteksi.created_at.desc()) \
+    histories = (
+        RiwayatDeteksi.query
+        .filter_by(user_id=current_user.id)
+        .order_by(RiwayatDeteksi.created_at.desc())
         .all()
+    )
 
     total_deteksi = len(histories)
     total_sehat = len([h for h in histories if h.hasil == "Healthy Rice Leaf"])
     total_penyakit = total_deteksi - total_sehat
 
-    # =========================
-    # JADWAL TANAM
-    # =========================
-    jadwal = JadwalTanam.query.filter_by(user_id=current_user.id) \
-        .order_by(JadwalTanam.created_at.desc()) \
+    jadwal = (
+        JadwalTanam.query
+        .filter_by(user_id=current_user.id)
+        .order_by(JadwalTanam.created_at.desc())
         .first()
+    )
 
-    # =========================
-    # COUNTDOWN
-    # =========================
-    countdown = None
-    if jadwal:
-        countdown = get_countdown_jadwal(jadwal)
+    countdown = get_countdown_jadwal(jadwal) if jadwal else None
 
-    # =========================
-    # PROGRESS BAR (🔥 INI YANG BARU)
-    # =========================
     progress_percent = 0
 
     if jadwal:
@@ -202,9 +220,6 @@ def dashboard():
         if total_hari > 0:
             progress_percent = max(0, min(100, int((hari_berjalan / total_hari) * 100)))
 
-    # =========================
-    # RENDER
-    # =========================
     return render_template(
         "beranda_user.html",
         active="beranda_user",
@@ -214,8 +229,9 @@ def dashboard():
         total_penyakit=total_penyakit,
         jadwal=jadwal,
         countdown=countdown,
-        progress_percent=progress_percent   # 🔥 WAJIB ADA
+        progress_percent=progress_percent
     )
+
 
 # =======================
 # USER RIWAYAT
@@ -223,9 +239,12 @@ def dashboard():
 @auth.route("/riwayat_user")
 @login_required
 def riwayat_user():
-    histories = RiwayatDeteksi.query.filter_by(user_id=current_user.id) \
-        .order_by(RiwayatDeteksi.created_at.desc()) \
+    histories = (
+        RiwayatDeteksi.query
+        .filter_by(user_id=current_user.id)
+        .order_by(RiwayatDeteksi.created_at.desc())
         .all()
+    )
 
     return render_template(
         "riwayat_user.html",
@@ -248,6 +267,7 @@ def hapus_riwayat(id):
 
     db.session.delete(riwayat)
     db.session.commit()
+
     flash("Riwayat berhasil dihapus.", "success")
     return redirect(url_for("auth.riwayat_user"))
 
@@ -265,6 +285,7 @@ def hapus_semua_riwayat():
         db.session.delete(item)
 
     db.session.commit()
+
     flash("Semua riwayat berhasil dihapus.", "success")
     return redirect(url_for("auth.riwayat_user"))
 
@@ -277,7 +298,7 @@ def hapus_semua_riwayat():
 def admin_dashboard():
     if current_user.role != "admin":
         flash("Akses ditolak.", "error")
-        return redirect(url_for("deteksi"))
+        return redirect(url_for("auth.dashboard"))
 
     total_pengguna = User.query.filter_by(role="user").count()
     total_deteksi = RiwayatDeteksi.query.count()
@@ -285,11 +306,13 @@ def admin_dashboard():
         RiwayatDeteksi.hasil != "Healthy Rice Leaf"
     ).count()
 
-    aktivitas_terbaru = db.session.query(RiwayatDeteksi, User) \
-        .join(User, RiwayatDeteksi.user_id == User.id) \
-        .order_by(RiwayatDeteksi.created_at.desc()) \
-        .limit(10) \
+    aktivitas_terbaru = (
+        db.session.query(RiwayatDeteksi, User)
+        .join(User, RiwayatDeteksi.user_id == User.id)
+        .order_by(RiwayatDeteksi.created_at.desc())
+        .limit(10)
         .all()
+    )
 
     return render_template(
         "beranda_admin.html",
@@ -309,7 +332,7 @@ def admin_dashboard():
 def users():
     if current_user.role != "admin":
         flash("Akses ditolak.", "error")
-        return redirect(url_for("deteksi"))
+        return redirect(url_for("auth.dashboard"))
 
     q = request.args.get("q", "").strip()
     status = request.args.get("status", "").strip()
@@ -331,7 +354,11 @@ def users():
     elif status == "inactive":
         query = query.filter(User.is_active.is_(False))
 
-    users_pagination = query.order_by(User.id.desc()).paginate(page=page, per_page=10, error_out=False)
+    users_pagination = query.order_by(User.id.desc()).paginate(
+        page=page,
+        per_page=10,
+        error_out=False
+    )
 
     user_ids = [user.id for user in users_pagination.items]
 
@@ -364,13 +391,13 @@ def users():
         riwayat_count_map=riwayat_count_map
     )
 
-#update user
+
 @auth.route("/admin/users/update/<int:user_id>", methods=["POST"])
 @login_required
 def update_user_admin(user_id):
     if current_user.role != "admin":
         flash("Akses ditolak.", "error")
-        return redirect(url_for("deteksi"))
+        return redirect(url_for("auth.dashboard"))
 
     user = User.query.filter_by(id=user_id, role="user").first()
 
@@ -421,16 +448,23 @@ def update_user_admin(user_id):
     return redirect(url_for("auth.users", q=q, status=status, page=page))
 
 
+# =======================
+# ADMIN DATA PENYAKIT
+# =======================
 @auth.route("/admin/penyakit")
 @login_required
 def penyakit():
     if current_user.role != "admin":
         flash("Akses ditolak.", "error")
-        return redirect(url_for("deteksi"))
+        return redirect(url_for("auth.dashboard"))
+
     return render_template("data_penyakit.html", active="penyakit_admin")
 
 
-@auth.route('/admin/varietas')
+# =======================
+# ADMIN VARIETAS PADI
+# =======================
+@auth.route("/admin/varietas")
 @login_required
 def varietas():
     if current_user.role != "admin":
@@ -444,30 +478,31 @@ def varietas():
         varietas_list=varietas_list,
         active="varietas_admin"
     )
-    
-@auth.route('/admin/varietas/tambah', methods=['GET', 'POST'])
+
+
+@auth.route("/admin/varietas/tambah", methods=["GET", "POST"])
 @login_required
 def tambah_varietas():
     if current_user.role != "admin":
         flash("Akses ditolak.", "error")
         return redirect(url_for("auth.dashboard"))
 
-    if request.method == 'POST':
-        nama = request.form.get('nama', '').strip()
-        hari_penyemaian = request.form.get('hari_penyemaian', type=int)
-        hari_penanaman = request.form.get('hari_penanaman', type=int)
-        hari_pemupukan_1 = request.form.get('hari_pemupukan_1', '').strip()
-        hari_pemupukan_2 = request.form.get('hari_pemupukan_2', '').strip()
-        hari_panen = request.form.get('hari_panen', type=int)
+    if request.method == "POST":
+        nama = request.form.get("nama", "").strip()
+        hari_penyemaian = request.form.get("hari_penyemaian", type=int)
+        hari_penanaman = request.form.get("hari_penanaman", type=int)
+        hari_pemupukan_1 = request.form.get("hari_pemupukan_1", "").strip()
+        hari_pemupukan_2 = request.form.get("hari_pemupukan_2", "").strip()
+        hari_panen = request.form.get("hari_panen", type=int)
 
         if not nama or hari_penyemaian is None or hari_penanaman is None or hari_panen is None:
             flash("Nama, hari penyemaian, hari penanaman, dan hari panen wajib diisi.", "error")
-            return redirect(url_for('auth.tambah_varietas'))
+            return redirect(url_for("auth.tambah_varietas"))
 
         cek = VarietasPadi.query.filter_by(nama=nama).first()
         if cek:
             flash("Varietas sudah ada.", "error")
-            return redirect(url_for('auth.tambah_varietas'))
+            return redirect(url_for("auth.tambah_varietas"))
 
         data = VarietasPadi(
             nama=nama,
@@ -482,17 +517,18 @@ def tambah_varietas():
         db.session.commit()
 
         flash("Varietas berhasil ditambahkan.", "success")
-        return redirect(url_for('auth.varietas'))
+        return redirect(url_for("auth.varietas"))
 
     return render_template(
-        'form_varietas.html',
-        title='Tambah Varietas',
-        form_action=url_for('auth.tambah_varietas'),
+        "form_varietas.html",
+        title="Tambah Varietas",
+        form_action=url_for("auth.tambah_varietas"),
         varietas=None,
-        active='varietas_admin'
+        active="varietas_admin"
     )
-    
-@auth.route('/admin/varietas/edit/<int:id>', methods=['GET', 'POST'])
+
+
+@auth.route("/admin/varietas/edit/<int:id>", methods=["GET", "POST"])
 @login_required
 def edit_varietas(id):
     if current_user.role != "admin":
@@ -501,25 +537,26 @@ def edit_varietas(id):
 
     varietas = VarietasPadi.query.get_or_404(id)
 
-    if request.method == 'POST':
-        nama = request.form.get('nama', '').strip()
-        hari_penyemaian = request.form.get('hari_penyemaian', type=int)
-        hari_penanaman = request.form.get('hari_penanaman', type=int)
-        hari_pemupukan_1 = request.form.get('hari_pemupukan_1', '').strip()
-        hari_pemupukan_2 = request.form.get('hari_pemupukan_2', '').strip()
-        hari_panen = request.form.get('hari_panen', type=int)
+    if request.method == "POST":
+        nama = request.form.get("nama", "").strip()
+        hari_penyemaian = request.form.get("hari_penyemaian", type=int)
+        hari_penanaman = request.form.get("hari_penanaman", type=int)
+        hari_pemupukan_1 = request.form.get("hari_pemupukan_1", "").strip()
+        hari_pemupukan_2 = request.form.get("hari_pemupukan_2", "").strip()
+        hari_panen = request.form.get("hari_panen", type=int)
 
         if not nama or hari_penyemaian is None or hari_penanaman is None or hari_panen is None:
             flash("Nama, hari penyemaian, hari penanaman, dan hari panen wajib diisi.", "error")
-            return redirect(url_for('auth.edit_varietas', id=id))
+            return redirect(url_for("auth.edit_varietas", id=id))
 
         cek = VarietasPadi.query.filter(
             VarietasPadi.nama == nama,
             VarietasPadi.id != id
         ).first()
+
         if cek:
             flash("Nama varietas sudah dipakai.", "error")
-            return redirect(url_for('auth.edit_varietas', id=id))
+            return redirect(url_for("auth.edit_varietas", id=id))
 
         varietas.nama = nama
         varietas.hari_penyemaian = hari_penyemaian
@@ -531,18 +568,18 @@ def edit_varietas(id):
         db.session.commit()
 
         flash("Varietas berhasil diperbarui.", "success")
-        return redirect(url_for('auth.varietas'))
+        return redirect(url_for("auth.varietas"))
 
     return render_template(
-        'form_varietas.html',
-        title='Edit Varietas',
-        form_action=url_for('auth.edit_varietas', id=id),
+        "form_varietas.html",
+        title="Edit Varietas",
+        form_action=url_for("auth.edit_varietas", id=id),
         varietas=varietas,
-        active='varietas_admin'
+        active="varietas_admin"
     )
 
-#delete
-@auth.route('/admin/varietas/delete/<int:id>', methods=['POST'])
+
+@auth.route("/admin/varietas/delete/<int:id>", methods=["POST"])
 @login_required
 def delete_varietas(id):
     if current_user.role != "admin":
@@ -554,19 +591,127 @@ def delete_varietas(id):
     dipakai = JadwalTanam.query.filter_by(varietas_id=id).first()
     if dipakai:
         flash("Varietas tidak bisa dihapus karena sudah dipakai user.", "error")
-        return redirect(url_for('auth.varietas'))
+        return redirect(url_for("auth.varietas"))
 
     db.session.delete(varietas)
     db.session.commit()
 
     flash("Varietas berhasil dihapus.", "success")
-    return redirect(url_for('auth.varietas'))
+    return redirect(url_for("auth.varietas"))
 
-# jadwal tanam user
+
+# =======================
+# ADMIN KELOLA KELOMPOK TANI
+# =======================
+@auth.route("/admin/kelompok_tani", methods=["GET", "POST"])
+@login_required
+def kelompok_tani_admin():
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    if request.method == "POST":
+        nama = request.form.get("nama", "").strip()
+        deskripsi = request.form.get("deskripsi", "").strip()
+
+        if not nama:
+            flash("Nama kelompok tani wajib diisi.", "error")
+            return redirect(url_for("auth.kelompok_tani_admin"))
+
+        cek = KelompokTani.query.filter_by(nama=nama).first()
+        if cek:
+            flash("Nama kelompok tani sudah ada.", "error")
+            return redirect(url_for("auth.kelompok_tani_admin"))
+
+        kelompok_baru = KelompokTani(
+            nama=nama,
+            deskripsi=deskripsi if deskripsi else None
+        )
+
+        db.session.add(kelompok_baru)
+        db.session.commit()
+
+        flash("Kelompok tani berhasil ditambahkan.", "success")
+        return redirect(url_for("auth.kelompok_tani_admin"))
+
+    kelompok_tani_list = (
+        KelompokTani.query
+        .order_by(KelompokTani.created_at.desc())
+        .all()
+    )
+
+    users_list = (
+        User.query
+        .filter_by(role="user")
+        .order_by(User.fullname.asc())
+        .all()
+    )
+
+    return render_template(
+        "kelompok_tani_admin.html",
+        active="kelompok_tani_admin",
+        kelompok_tani_list=kelompok_tani_list,
+        users=users_list
+    )
+
+
+@auth.route("/admin/kelompok_tani/<int:id>/atur_anggota", methods=["POST"])
+@login_required
+def atur_anggota_kelompok_tani(id):
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    kelompok = KelompokTani.query.get_or_404(id)
+    user_ids = request.form.getlist("user_ids")
+
+    kelompok.anggota.clear()
+
+    for user_id in user_ids:
+        user = User.query.filter_by(id=int(user_id), role="user").first()
+        if user:
+            kelompok.anggota.append(user)
+
+    db.session.commit()
+
+    flash("Anggota kelompok tani berhasil diperbarui.", "success")
+    return redirect(url_for("auth.kelompok_tani_admin"))
+
+
+@auth.route("/admin/kelompok_tani/<int:id>/hapus", methods=["POST"])
+@login_required
+def hapus_kelompok_tani(id):
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    kelompok = KelompokTani.query.get_or_404(id)
+
+    dipakai_jadwal = JadwalTanam.query.filter_by(kelompok_tani_id=id).first()
+    if dipakai_jadwal:
+        flash("Kelompok tani tidak bisa dihapus karena sudah dipakai pada jadwal tanam.", "error")
+        return redirect(url_for("auth.kelompok_tani_admin"))
+
+    kelompok.anggota.clear()
+    db.session.delete(kelompok)
+    db.session.commit()
+
+    flash("Kelompok tani berhasil dihapus.", "success")
+    return redirect(url_for("auth.kelompok_tani_admin"))
+
+
+# =======================
+# USER JADWAL TANAM
+# =======================
 @auth.route("/jadwal_user", methods=["GET", "POST"])
 @login_required
 def jadwal_user():
+    if current_user.role != "user":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.admin_dashboard"))
+
     varietas_list = VarietasPadi.query.order_by(VarietasPadi.nama.asc()).all()
+    kelompok_tani_list = current_user.kelompok_tani_list
     today = date.today()
 
     # =========================
@@ -574,16 +719,27 @@ def jadwal_user():
     # =========================
     if request.method == "POST":
         varietas_id = request.form.get("varietas_id", type=int)
+        kelompok_tani_id = request.form.get("kelompok_tani_id", type=int)
         tanggal_semai_str = request.form.get("tanggal_semai")
 
-        if not varietas_id or not tanggal_semai_str:
-            flash("Varietas padi dan tanggal semai wajib diisi.", "error")
+        if not varietas_id or not kelompok_tani_id or not tanggal_semai_str:
+            flash("Varietas padi, kelompok tani, dan tanggal semai wajib diisi.", "error")
             return redirect(url_for("auth.jadwal_user"))
 
         varietas = VarietasPadi.query.get(varietas_id)
 
         if not varietas:
             flash("Varietas tidak ditemukan.", "error")
+            return redirect(url_for("auth.jadwal_user"))
+
+        kelompok_tani = KelompokTani.query.get(kelompok_tani_id)
+
+        if not kelompok_tani:
+            flash("Kelompok tani tidak ditemukan.", "error")
+            return redirect(url_for("auth.jadwal_user"))
+
+        if kelompok_tani not in current_user.kelompok_tani_list:
+            flash("Kamu tidak terdaftar pada kelompok tani tersebut.", "error")
             return redirect(url_for("auth.jadwal_user"))
 
         try:
@@ -610,6 +766,7 @@ def jadwal_user():
         jadwal_baru = JadwalTanam(
             user_id=current_user.id,
             varietas_id=varietas.id,
+            kelompok_tani_id=kelompok_tani.id,
             tanggal_semai=tanggal_semai,
             tanggal_penyemaian=tanggal_penyemaian,
             tanggal_penanaman=tanggal_penanaman,
@@ -622,19 +779,21 @@ def jadwal_user():
         db.session.commit()
 
         flash("Jadwal tanam berhasil dibuat.", "success")
-
-        # Setelah membuat jadwal, kembali ke list.
-        # Detail belum muncul sebelum user klik salah satu schedule.
         return redirect(url_for("auth.jadwal_user"))
 
     # =========================
     # AMBIL SEMUA JADWAL USER
     # =========================
-    jadwal_list = JadwalTanam.query.filter_by(
-        user_id=current_user.id
-    ).order_by(
-        JadwalTanam.created_at.desc()
-    ).all()
+    jadwal_list = (
+        JadwalTanam.query
+        .options(
+            joinedload(JadwalTanam.varietas),
+            joinedload(JadwalTanam.kelompok_tani)
+        )
+        .filter_by(user_id=current_user.id)
+        .order_by(JadwalTanam.created_at.desc())
+        .all()
+    )
 
     # =========================
     # AMBIL JADWAL YANG DIKLIK
@@ -642,16 +801,23 @@ def jadwal_user():
     selected_jadwal_id = request.args.get("jadwal_id", type=int)
 
     if selected_jadwal_id:
-        jadwal = JadwalTanam.query.filter_by(
-            id=selected_jadwal_id,
-            user_id=current_user.id
-        ).first()
+        jadwal = (
+            JadwalTanam.query
+            .options(
+                joinedload(JadwalTanam.varietas),
+                joinedload(JadwalTanam.kelompok_tani)
+            )
+            .filter_by(
+                id=selected_jadwal_id,
+                user_id=current_user.id
+            )
+            .first()
+        )
     else:
-        # Ini sengaja None supaya detail tidak langsung muncul.
-        # Detail baru muncul saat user klik list schedule.
         jadwal = None
 
     selected_varietas = jadwal.varietas if jadwal else None
+    selected_kelompok_tani = jadwal.kelompok_tani if jadwal else None
 
     steps = []
     total_durasi = 0
@@ -715,10 +881,12 @@ def jadwal_user():
         "jadwal_user.html",
         active="jadwal_user",
         varietas_list=varietas_list,
+        kelompok_tani_list=kelompok_tani_list,
         jadwal=jadwal,
         jadwal_list=jadwal_list,
         selected_jadwal_id=selected_jadwal_id,
         selected_varietas=selected_varietas,
+        selected_kelompok_tani=selected_kelompok_tani,
         steps=steps,
         total_durasi=total_durasi,
         waktu_berjalan=waktu_berjalan,
@@ -728,6 +896,7 @@ def jadwal_user():
         current_month_label=current_month_label,
         today=today
     )
+
 
 # =======================
 # HAPUS JADWAL TANAM USER
@@ -749,6 +918,35 @@ def hapus_jadwal_user(id):
 
     flash("Jadwal tanam berhasil dihapus.", "success")
     return redirect(url_for("auth.jadwal_user"))
+
+
+# =======================
+# ADMIN LIHAT SEMUA JADWAL PETANI
+# =======================
+@auth.route("/admin/jadwal_petani")
+@login_required
+def admin_jadwal_petani():
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    jadwal_list = (
+        JadwalTanam.query
+        .options(
+            joinedload(JadwalTanam.user),
+            joinedload(JadwalTanam.varietas),
+            joinedload(JadwalTanam.kelompok_tani)
+        )
+        .order_by(JadwalTanam.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "admin_jadwal_petani.html",
+        active="jadwal_petani_admin",
+        jadwal_list=jadwal_list
+    )
+
 
 # =======================
 # USER PROFILE
@@ -828,6 +1026,7 @@ def profile_user():
             current_user.profile_image = f"/static/uploads/profile/{unique_filename}"
 
         db.session.commit()
+
         flash("Profil berhasil diperbarui.", "success")
         return redirect(url_for("auth.profile_user"))
 
@@ -849,6 +1048,10 @@ def delete_profile_user():
 
     riwayat_user = RiwayatDeteksi.query.filter_by(user_id=user.id).all()
     for item in riwayat_user:
+        db.session.delete(item)
+
+    jadwal_user_list = JadwalTanam.query.filter_by(user_id=user.id).all()
+    for item in jadwal_user_list:
         db.session.delete(item)
 
     if user.profile_image:
@@ -876,7 +1079,7 @@ def delete_profile_user():
 def profile_admin():
     if current_user.role != "admin":
         flash("Akses ditolak.", "error")
-        return redirect(url_for("deteksi"))
+        return redirect(url_for("auth.dashboard"))
 
     if request.method == "POST":
         fullname = request.form.get("fullname")
@@ -946,6 +1149,7 @@ def profile_admin():
             current_user.profile_image = f"/static/uploads/profile/{unique_filename}"
 
         db.session.commit()
+
         flash("Profil admin berhasil diperbarui.", "success")
         return redirect(url_for("auth.profile_admin"))
 
@@ -961,5 +1165,4 @@ def logout():
     logout_user()
     session.clear()
     flash("Berhasil logout.", "success")
-    return redirect(url_for("auth.login"))
     return redirect(url_for("auth.login"))
