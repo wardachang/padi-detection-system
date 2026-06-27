@@ -23,6 +23,7 @@ import click
 import gc
 import tensorflow as tf
 from flask.cli import with_appcontext
+import traceback
 
 
 # =======================
@@ -52,8 +53,8 @@ def add_no_cache_headers(response):
 # =======================
 # Model TIDAK di-load di awal aplikasi.
 # Model hanya akan di-load saat user melakukan deteksi.
-MODEL_FILTER_PATH = "model/model_resnet_final.h5"
-MODEL_PADI_PATH = "model/baru_model.h5"
+MODEL_FILTER_PATH = "model/filter_baru.keras"
+MODEL_PADI_PATH = "model/baru_model.keras"
 
 class_names_filter = ["BUKAN PADI", "PADI"]
 
@@ -160,9 +161,13 @@ def predict_disease(img_path):
         gc.collect()
         print("Model penyakit padi sudah dibersihkan dari memori.")
 
-    idx = int(np.argmax(pred))
+    temperature = 2.5
+    pred_scaled = np.exp(np.log(pred + 1e-8) / temperature)
+    pred_scaled = pred_scaled / pred_scaled.sum()
+
+    idx = int(np.argmax(pred_scaled))
     prediction = class_names[idx]
-    confidence = float(pred[idx]) * 100
+    confidence = float(pred_scaled[idx]) * 100
 
     print("\n=== DETEKSI PENYAKIT PADI ===")
     for name, prob in zip(class_names, pred):
@@ -297,6 +302,8 @@ def deteksi():
                     db.session.commit()
 
                 except Exception as e:
+                    traceback.print_exc()
+                    print("ERROR ASLI:", e)
                     error = f"Terjadi kesalahan saat prediksi: {str(e)}"
 
     return render_template(

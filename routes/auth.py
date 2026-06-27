@@ -602,7 +602,9 @@ def delete_varietas(id):
 
 # =======================
 # ADMIN KELOLA KELOMPOK TANI
+# Paste bagian ini ke routes.py kamu, ganti blok kelompok tani yang lama
 # =======================
+
 @auth.route("/admin/kelompok_tani", methods=["GET", "POST"])
 @login_required
 def kelompok_tani_admin():
@@ -627,6 +629,13 @@ def kelompok_tani_admin():
             nama=nama,
             deskripsi=deskripsi if deskripsi else None
         )
+
+        # Tambah anggota langsung saat buat kelompok baru
+        user_ids = request.form.getlist("user_ids")
+        for user_id in user_ids:
+            user = User.query.filter_by(id=int(user_id), role="user").first()
+            if user:
+                kelompok_baru.anggota.append(user)
 
         db.session.add(kelompok_baru)
         db.session.commit()
@@ -655,6 +664,52 @@ def kelompok_tani_admin():
     )
 
 
+# =====================================================
+# ROUTE BARU: Edit nama + deskripsi + anggota sekaligus
+# =====================================================
+@auth.route("/admin/kelompok_tani/<int:id>/edit", methods=["POST"])
+@login_required
+def edit_kelompok_tani(id):
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    kelompok = KelompokTani.query.get_or_404(id)
+
+    nama = request.form.get("nama", "").strip()
+    deskripsi = request.form.get("deskripsi", "").strip()
+    user_ids = request.form.getlist("user_ids")
+
+    if not nama:
+        flash("Nama kelompok tani wajib diisi.", "error")
+        return redirect(url_for("auth.kelompok_tani_admin"))
+
+    # Cek duplikat nama (kecuali kelompok ini sendiri)
+    cek = KelompokTani.query.filter(
+        KelompokTani.nama == nama,
+        KelompokTani.id != id
+    ).first()
+    if cek:
+        flash("Nama kelompok tani sudah dipakai kelompok lain.", "error")
+        return redirect(url_for("auth.kelompok_tani_admin"))
+
+    kelompok.nama = nama
+    kelompok.deskripsi = deskripsi if deskripsi else None
+
+    # Update anggota
+    kelompok.anggota.clear()
+    for user_id in user_ids:
+        user = User.query.filter_by(id=int(user_id), role="user").first()
+        if user:
+            kelompok.anggota.append(user)
+
+    db.session.commit()
+
+    flash(f"Kelompok '{kelompok.nama}' berhasil diperbarui.", "success")
+    return redirect(url_for("auth.kelompok_tani_admin"))
+
+
+# Route lama atur_anggota tetap ada untuk kompatibilitas
 @auth.route("/admin/kelompok_tani/<int:id>/atur_anggota", methods=["POST"])
 @login_required
 def atur_anggota_kelompok_tani(id):
@@ -919,9 +974,9 @@ def hapus_jadwal_user(id):
     flash("Jadwal tanam berhasil dihapus.", "success")
     return redirect(url_for("auth.jadwal_user"))
 
-
 # =======================
 # ADMIN LIHAT SEMUA JADWAL PETANI
+# Ganti route yang lama dengan ini
 # =======================
 @auth.route("/admin/jadwal_petani")
 @login_required
@@ -944,9 +999,9 @@ def admin_jadwal_petani():
     return render_template(
         "admin_jadwal_petani.html",
         active="jadwal_petani_admin",
-        jadwal_list=jadwal_list
+        jadwal_list=jadwal_list,
+        today=date.today()   # <-- tambahan ini saja
     )
-
 
 # =======================
 # USER PROFILE

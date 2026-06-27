@@ -10,9 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
-    body {
-      font-family: "Inter", sans-serif;
-    }
+    body { font-family: "Inter", sans-serif; }
 
     #sidebar-overlay {
       display: none;
@@ -21,16 +19,11 @@
       background: rgba(0,0,0,0.4);
       z-index: 30;
     }
-
-    #sidebar-overlay.active {
-      display: block;
-    }
+    #sidebar-overlay.active { display: block; }
 
     #sidebar {
       position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
+      top: 0; left: 0; bottom: 0;
       width: 272px;
       z-index: 40;
       display: flex;
@@ -41,10 +34,7 @@
       border-right: 1px solid #e2e8f0;
       overflow-y: auto;
     }
-
-    #sidebar.open {
-      transform: translateX(0);
-    }
+    #sidebar.open { transform: translateX(0); }
 
     @media (min-width: 1024px) {
       #sidebar {
@@ -55,14 +45,8 @@
         width: 272px;
         height: 100vh;
       }
-
-      #sidebar-overlay {
-        display: none !important;
-      }
-
-      #mobile-menu-btn {
-        display: none !important;
-      }
+      #sidebar-overlay { display: none !important; }
+      #mobile-menu-btn { display: none !important; }
     }
   </style>
 </head>
@@ -70,31 +54,20 @@
 <body class="h-screen overflow-hidden bg-[#F3F6F3] text-slate-900">
 <div class="flex h-screen overflow-hidden">
 
-  <!-- Overlay Mobile -->
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-  <!-- Sidebar -->
   <div id="sidebar">
     {% include 'sidebar_admin.html' %}
   </div>
 
-  <!-- Main -->
   <main class="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto">
 
-    <!-- Topbar -->
     <div class="sticky top-0 z-30 h-14 border-b border-slate-200 bg-white flex items-center px-4 gap-3 shrink-0">
-      <button
-        id="mobile-menu-btn"
-        onclick="openSidebar()"
-        class="p-2 rounded-lg hover:bg-slate-100 transition lg:hidden"
-        aria-label="Buka menu"
-      >
+      <button id="mobile-menu-btn" onclick="openSidebar()"
+        class="p-2 rounded-lg hover:bg-slate-100 transition lg:hidden" aria-label="Buka menu">
         <i class="fa-solid fa-bars text-slate-600"></i>
       </button>
-
-      <span class="font-extrabold text-sm text-slate-700">
-        Jadwal Petani
-      </span>
+      <span class="font-extrabold text-sm text-slate-700">Jadwal Petani</span>
     </div>
 
     <div class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
@@ -105,11 +78,8 @@
           <div id="flash-container" class="fixed top-5 right-3 sm:right-5 z-50 space-y-3">
             {% for category, message in messages %}
               <div class="flash-message min-w-[220px] max-w-xs rounded-xl px-4 py-3 shadow-lg flex items-start gap-3 transition-all duration-500 opacity-0 translate-x-10
-                {% if category == 'success' %}
-                  bg-green-100 text-green-700 border border-green-200
-                {% else %}
-                  bg-red-100 text-red-700 border border-red-200
-                {% endif %}">
+                {% if category == 'success' %}bg-green-100 text-green-700 border border-green-200
+                {% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
                 <div class="mt-1 shrink-0">
                   {% if category == 'success' %}
                     <i class="fa-solid fa-circle-check text-green-600"></i>
@@ -127,14 +97,9 @@
       <!-- HEADER -->
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold">
-            Jadwal Tanam Petani
-          </h1>
-          <p class="text-slate-500 text-sm mt-1">
-            Menampilkan seluruh jadwal tanam yang dibuat oleh pengguna.
-          </p>
+          <h1 class="text-2xl md:text-3xl font-extrabold">Jadwal Tanam Petani</h1>
+          <p class="text-slate-500 text-sm mt-1">Menampilkan seluruh jadwal tanam yang dibuat oleh pengguna.</p>
         </div>
-
         <div class="rounded-xl bg-emerald-100 px-4 py-2 text-sm font-extrabold text-emerald-700 w-fit">
           Total: {{ jadwal_list|length }} jadwal
         </div>
@@ -144,73 +109,94 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
           <div>
-            <h2 class="font-extrabold text-slate-900">
-              Daftar Jadwal Petani
-            </h2>
-            <p class="text-xs text-slate-500 mt-0.5">
-              Data berisi nama petani, kelompok tani, varietas, tanggal semai, dan tanggal panen.
-            </p>
+            <h2 class="font-extrabold text-slate-900">Daftar Jadwal Petani</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Data berisi nama petani, kelompok tani, varietas, tanggal semai, dan tanggal panen.</p>
           </div>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[1100px] text-sm">
+          <table class="w-full min-w-[1200px] text-sm">
             <thead class="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                  No
-                </th>
-                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                  Petani
-                </th>
-                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                  Email
-                </th>
-                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                  Kelompok Tani
-                </th>
-                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                  Varietas
-                </th>
-                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                  Tanggal Semai
-                </th>
-                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                  Tanggal Panen
-                </th>
-                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                  Dibuat
-                </th>
+                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">No</th>
+                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">Petani</th>
+                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">Email</th>
+                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">Kelompok Tani</th>
+                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">Varietas</th>
+                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">Tanggal Semai</th>
+                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">Tanggal Panen</th>
+                <th class="px-5 py-4 text-left text-xs font-extrabold uppercase tracking-widest text-slate-500">Dibuat</th>
+                <th class="px-5 py-4 text-center text-xs font-extrabold uppercase tracking-widest text-slate-500">Aksi</th>
               </tr>
             </thead>
 
             <tbody class="divide-y divide-slate-100 bg-white">
               {% for item in jadwal_list %}
-                <tr class="jadwal-row hover:bg-slate-50 transition">
-                  <td class="px-5 py-4 font-semibold text-slate-500 whitespace-nowrap">
-                    {{ loop.index }}
-                  </td>
+                {# Hitung done di backend - sama persis dengan logika jadwal_user #}
+                {% set semai_done      = item.tanggal_semai and today >= item.tanggal_semai %}
+                {% set penyemaian_done = item.tanggal_penyemaian and today >= item.tanggal_penyemaian %}
+                {% set penanaman_done  = item.tanggal_penanaman and today >= item.tanggal_penanaman %}
+                {% set pupuk1_done     = item.tanggal_pemupukan_1 and today >= item.tanggal_pemupukan_1 %}
+                {% set pupuk2_done     = item.tanggal_pemupukan_2 and today >= item.tanggal_pemupukan_2 %}
+                {% set panen_done      = item.tanggal_panen and today >= item.tanggal_panen %}
+
+                {# Hitung stats #}
+                {% if item.tanggal_semai and item.tanggal_panen %}
+                  {% set total_durasi   = (item.tanggal_panen - item.tanggal_semai).days %}
+                  {% set hari_berjalan  = (today - item.tanggal_semai).days %}
+                  {% set waktu_berjalan = [0, [hari_berjalan, total_durasi]|min]|max %}
+                  {% set sisa_waktu     = [(item.tanggal_panen - today).days, 0]|max %}
+                {% else %}
+                  {% set total_durasi   = 0 %}
+                  {% set waktu_berjalan = 0 %}
+                  {% set sisa_waktu     = 0 %}
+                {% endif %}
+
+                <tr class="jadwal-row hover:bg-slate-50 transition"
+                  data-id="{{ item.id }}"
+                  data-petani="{{ item.user.fullname if item.user else '-' }}"
+                  data-email="{{ item.user.email if item.user else '-' }}"
+                  data-kelompok="{{ item.kelompok_tani.nama if item.kelompok_tani else '-' }}"
+                  data-varietas="{{ item.varietas.nama if item.varietas else '-' }}"
+                  data-durasi="{{ item.varietas.hari_panen if item.varietas else '0' }}"
+                  data-total-durasi="{{ total_durasi }}"
+                  data-waktu-berjalan="{{ waktu_berjalan }}"
+                  data-sisa-waktu="{{ sisa_waktu }}"
+                  data-created="{{ item.created_at.strftime('%d %B %Y') if item.created_at else '-' }}"
+
+                  data-semai="{{ item.tanggal_semai.strftime('%d %B %Y') if item.tanggal_semai else '-' }}"
+                  data-semai-done="{{ 'true' if semai_done else 'false' }}"
+
+                  data-penyemaian="{{ item.tanggal_penyemaian.strftime('%d %B %Y') if item.tanggal_penyemaian else '' }}"
+                  data-penyemaian-done="{{ 'true' if penyemaian_done else 'false' }}"
+
+                  data-penanaman="{{ item.tanggal_penanaman.strftime('%d %B %Y') if item.tanggal_penanaman else '' }}"
+                  data-penanaman-done="{{ 'true' if penanaman_done else 'false' }}"
+
+                  data-pemupukan1="{{ item.tanggal_pemupukan_1.strftime('%d %B %Y') if item.tanggal_pemupukan_1 else '' }}"
+                  data-pemupukan1-done="{{ 'true' if pupuk1_done else 'false' }}"
+
+                  data-pemupukan2="{{ item.tanggal_pemupukan_2.strftime('%d %B %Y') if item.tanggal_pemupukan_2 else '' }}"
+                  data-pemupukan2-done="{{ 'true' if pupuk2_done else 'false' }}"
+
+                  data-panen="{{ item.tanggal_panen.strftime('%d %B %Y') if item.tanggal_panen else '-' }}"
+                  data-panen-done="{{ 'true' if panen_done else 'false' }}"
+                >
+                  <td class="px-5 py-4 font-semibold text-slate-500 whitespace-nowrap">{{ loop.index }}</td>
 
                   <td class="px-5 py-4">
                     <div class="flex items-center gap-3">
                       <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-user text-emerald-600"></i>
                       </div>
-
                       <div class="min-w-0">
-                        <div class="font-extrabold text-slate-800 truncate">
-                          {{ item.user.fullname if item.user else '-' }}
-                        </div>
-                        <div class="text-xs text-slate-500">
-                          Petani
-                        </div>
+                        <div class="font-extrabold text-slate-800 truncate">{{ item.user.fullname if item.user else '-' }}</div>
+                        <div class="text-xs text-slate-500">Petani</div>
                       </div>
                     </div>
                   </td>
 
-                  <td class="px-5 py-4 text-slate-500 whitespace-nowrap">
-                    {{ item.user.email if item.user else '-' }}
-                  </td>
+                  <td class="px-5 py-4 text-slate-500 whitespace-nowrap">{{ item.user.email if item.user else '-' }}</td>
 
                   <td class="px-5 py-4 whitespace-nowrap">
                     <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-extrabold text-blue-700">
@@ -218,9 +204,7 @@
                     </span>
                   </td>
 
-                  <td class="px-5 py-4 font-bold text-slate-700 whitespace-nowrap">
-                    {{ item.varietas.nama if item.varietas else '-' }}
-                  </td>
+                  <td class="px-5 py-4 font-bold text-slate-700 whitespace-nowrap">{{ item.varietas.nama if item.varietas else '-' }}</td>
 
                   <td class="px-5 py-4 whitespace-nowrap">
                     <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">
@@ -237,21 +221,23 @@
                   <td class="px-5 py-4 whitespace-nowrap text-slate-500">
                     {{ item.created_at.strftime('%d %b %Y') if item.created_at else '-' }}
                   </td>
+
+                  <td class="px-5 py-4 whitespace-nowrap text-center">
+                    <button type="button" onclick="openDetailModal('{{ item.id }}')"
+                      class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-extrabold text-white hover:bg-emerald-600 transition">
+                      <i class="fa-solid fa-eye"></i>
+                      Lihat Detail
+                    </button>
+                  </td>
                 </tr>
               {% else %}
                 <tr>
-                  <td colspan="8" class="px-5 py-10 text-center text-slate-500">
+                  <td colspan="9" class="px-5 py-10 text-center text-slate-500">
                     <div class="mx-auto h-16 w-16 rounded-2xl bg-emerald-100 flex items-center justify-center mb-4">
                       <i class="fa-solid fa-calendar-days text-emerald-600 text-2xl"></i>
                     </div>
-
-                    <div class="font-extrabold text-slate-800">
-                      Belum ada jadwal tanam
-                    </div>
-
-                    <div class="mt-1 text-sm text-slate-500">
-                      Jadwal akan muncul setelah pengguna membuat jadwal tanam.
-                    </div>
+                    <div class="font-extrabold text-slate-800">Belum ada jadwal tanam</div>
+                    <div class="mt-1 text-sm text-slate-500">Jadwal akan muncul setelah pengguna membuat jadwal tanam.</div>
                   </td>
                 </tr>
               {% endfor %}
@@ -260,40 +246,18 @@
         </div>
 
         {% if jadwal_list|length > 0 %}
-          <!-- PAGINATION FRONTEND -->
-          <div
-            id="jadwal-pagination-wrapper"
-            class="px-5 py-4 border-t border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-          >
-            <div
-              id="jadwal-pagination-info"
-              class="text-xs font-semibold text-slate-500"
-            ></div>
-
+          <div id="jadwal-pagination-wrapper"
+            class="px-5 py-4 border-t border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div id="jadwal-pagination-info" class="text-xs font-semibold text-slate-500"></div>
             <div class="flex items-center gap-2">
-              <button
-                type="button"
-                id="jadwal-prev-page"
-                onclick="changeJadwalPage(-1)"
-                class="h-9 px-3 rounded-lg border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-s class="h-9 px-3 rounded-lg border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition"
-              >
-                <i class="fa-solid fa-chevron-left mr-1"></i>
-                Sebelumnya
+              <button type="button" id="jadwal-prev-page" onclick="changeJadwalPage(-1)"
+                class="h-9 px-3 rounded-lg border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-chevron-left mr-1"></i>Sebelumnya
               </button>
-
-              <div
-                id="jadwal-page-numbers"
-                class="flex items-center gap-1"
-              ></div>
-
-              <button
-                type="button"
-                id="jadwal-next-page"
-                onclick="changeJadwalPage(1)"
-                class="h-9 px-3 rounded-lg border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition"
-              >
-                Berikutnya
-                <i class="fa-solid fa-chevron-right ml-1"></i>
+              <div id="jadwal-page-numbers" class="flex items-center gap-1"></div>
+              <button type="button" id="jadwal-next-page" onclick="changeJadwalPage(1)"
+                class="h-9 px-3 rounded-lg border border-slate-200 text-xs font-extrabold text-slate-600 hover:bg-slate-50 transition">
+                Berikutnya<i class="fa-solid fa-chevron-right ml-1"></i>
               </button>
             </div>
           </div>
@@ -304,43 +268,123 @@
   </main>
 </div>
 
+<!-- MODAL DETAIL JADWAL -->
+<div id="detailJadwalModal"
+  class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/40 p-4 overflow-y-auto">
+  <div class="w-full max-w-2xl rounded-3xl bg-white shadow-2xl overflow-hidden my-6">
+
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-slate-100 flex items-start justify-between gap-4">
+      <div class="flex items-start gap-3">
+        <div class="h-11 w-11 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-calendar-days text-emerald-600"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-900">Detail Jadwal Tanam</h2>
+          <p class="mt-1 text-sm text-slate-500">
+            <span id="modal-petani" class="font-bold text-slate-700"></span>
+            &nbsp;·&nbsp;
+            <span id="modal-kelompok-badge" class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-extrabold text-blue-700"></span>
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">Aktif</span>
+        <button type="button" onclick="closeDetailModal()"
+          class="h-9 w-9 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="px-6 py-5 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
+
+      <!-- Detail Header Card -->
+      <div class="rounded-2xl bg-white border border-slate-200 p-4">
+        <div class="text-xs font-extrabold tracking-widest text-emerald-600 uppercase">Detail Schedule</div>
+        <h3 class="mt-1 text-xl font-extrabold text-slate-900" id="modal-varietas"></h3>
+        <p class="mt-1 text-sm text-slate-500">Semai: <span id="modal-semai-head" class="font-semibold text-slate-700"></span></p>
+        <p class="mt-1 text-sm text-slate-500">Kelompok Tani: <span id="modal-kelompok-head" class="font-bold text-slate-700"></span></p>
+        <p class="mt-1 text-sm text-slate-500">Email: <span id="modal-email" class="font-bold text-slate-700"></span></p>
+      </div>
+
+      <!-- Peta Jalan Pertumbuhan -->
+      <div class="rounded-2xl bg-white border border-slate-200 p-4">
+        <h3 class="font-extrabold text-slate-900 mb-5">Peta Jalan Pertumbuhan</h3>
+        <div class="w-full overflow-x-auto pb-2">
+          <div id="modal-steps-track" class="relative">
+            <div class="absolute left-0 right-0 top-6 h-1 rounded-full bg-slate-200"></div>
+            <div id="modal-progress-bar" class="absolute left-0 top-6 h-1 rounded-full bg-emerald-500 transition-all duration-500" style="width:0%"></div>
+            <div id="modal-steps" class="relative flex justify-between"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="rounded-2xl bg-white border border-slate-200 p-4 text-center">
+          <div class="text-[10px] font-extrabold tracking-widest text-emerald-700 uppercase leading-tight">Total Durasi</div>
+          <div class="mt-2 text-2xl font-extrabold text-slate-900" id="modal-durasi">-</div>
+          <div class="text-xs text-slate-400 font-semibold">Hari</div>
+        </div>
+        <div class="rounded-2xl bg-white border border-slate-200 p-4 text-center">
+          <div class="text-[10px] font-extrabold tracking-widest text-emerald-700 uppercase leading-tight">Berjalan</div>
+          <div class="mt-2 text-2xl font-extrabold text-slate-900" id="modal-berjalan">-</div>
+          <div class="text-xs text-slate-400 font-semibold">Hari</div>
+        </div>
+        <div class="rounded-2xl bg-white border border-slate-200 p-4 text-center">
+          <div class="text-[10px] font-extrabold tracking-widest text-emerald-700 uppercase leading-tight">Sisa Waktu</div>
+          <div class="mt-2 text-2xl font-extrabold text-slate-900" id="modal-sisa">-</div>
+          <div class="text-xs text-slate-400 font-semibold">Hari</div>
+        </div>
+      </div>
+
+      <!-- Ringkasan -->
+      <div class="rounded-2xl bg-white border border-slate-200 p-4">
+        <h3 class="font-extrabold text-slate-900 mb-4">Ringkasan Jadwal</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="modal-ringkasan"></div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+      <button type="button" onclick="closeDetailModal()"
+        class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-extrabold text-slate-700 hover:bg-slate-50 transition">
+        Tutup
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
+  /* ── SIDEBAR ── */
   function openSidebar() {
     document.getElementById('sidebar').classList.add('open');
     document.getElementById('sidebar-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
   }
-
   function closeSidebar() {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('active');
     document.body.style.overflow = '';
   }
 
+  /* ── FLASH ── */
   window.addEventListener("DOMContentLoaded", () => {
-    const flashMessages = document.querySelectorAll(".flash-message");
-
-    flashMessages.forEach((msg, index) => {
-      setTimeout(() => {
-        msg.classList.add("translate-x-0", "opacity-100");
-      }, index * 100);
-
+    document.querySelectorAll(".flash-message").forEach((msg, i) => {
+      setTimeout(() => msg.classList.add("translate-x-0", "opacity-100"), i * 100);
       setTimeout(() => {
         msg.classList.add("opacity-0", "translate-x-10");
-
-        setTimeout(() => {
-          msg.remove();
-        }, 500);
+        setTimeout(() => msg.remove(), 500);
       }, 3000);
-
-      msg.addEventListener("click", () => {
-        msg.remove();
-      });
+      msg.addEventListener("click", () => msg.remove());
     });
-
     renderJadwalPagination();
   });
 
+  /* ── PAGINATION ── */
   const jadwalRows = Array.from(document.querySelectorAll(".jadwal-row"));
   const jadwalRowsPerPage = 5;
   let jadwalCurrentPage = 1;
@@ -349,77 +393,56 @@
   function renderJadwalPagination() {
     if (jadwalRows.length === 0) return;
 
-    const wrapper = document.getElementById("jadwal-pagination-wrapper");
-    const paginationInfo = document.getElementById("jadwal-pagination-info");
-    const prevButton = document.getElementById("jadwal-prev-page");
-    const nextButton = document.getElementById("jadwal-next-page");
+    const wrapper     = document.getElementById("jadwal-pagination-wrapper");
+    const info        = document.getElementById("jadwal-pagination-info");
+    const prevBtn     = document.getElementById("jadwal-prev-page");
+    const nextBtn     = document.getElementById("jadwal-next-page");
     const pageNumbers = document.getElementById("jadwal-page-numbers");
 
     if (jadwalTotalPages <= 1) {
-      jadwalRows.forEach((row) => {
-        row.style.display = "";
-      });
-
-      if (wrapper) {
-        wrapper.classList.add("hidden");
-      }
-
+      jadwalRows.forEach(r => r.style.display = "");
+      if (wrapper) wrapper.classList.add("hidden");
       return;
     }
 
-    if (wrapper) {
-      wrapper.classList.remove("hidden");
-    }
+    if (wrapper) wrapper.classList.remove("hidden");
 
     const start = (jadwalCurrentPage - 1) * jadwalRowsPerPage;
-    const end = start + jadwalRowsPerPage;
+    const end   = start + jadwalRowsPerPage;
+    jadwalRows.forEach((r, i) => r.style.display = i >= start && i < end ? "" : "none");
 
-    jadwalRows.forEach((row, index) => {
-      row.style.display = index >= start && index < end ? "" : "none";
-    });
+    if (info) info.textContent = `Menampilkan ${start + 1}–${Math.min(end, jadwalRows.length)} dari ${jadwalRows.length} jadwal`;
 
-    if (paginationInfo) {
-      paginationInfo.textContent =
-        `Menampilkan ${start + 1}-${Math.min(end, jadwalRows.length)} dari ${jadwalRows.length} jadwal`;
+    if (prevBtn) {
+      prevBtn.disabled = jadwalCurrentPage === 1;
+      prevBtn.classList.toggle("opacity-50", jadwalCurrentPage === 1);
+      prevBtn.classList.toggle("cursor-not-allowed", jadwalCurrentPage === 1);
     }
-
-    if (prevButton) {
-      prevButton.disabled = jadwalCurrentPage === 1;
-      prevButton.classList.toggle("opacity-50", jadwalCurrentPage === 1);
-      prevButton.classList.toggle("cursor-not-allowed", jadwalCurrentPage === 1);
-    }
-
-    if (nextButton) {
-      nextButton.disabled = jadwalCurrentPage === jadwalTotalPages;
-      nextButton.classList.toggle("opacity-50", jadwalCurrentPage === jadwalTotalPages);
-      nextButton.classList.toggle("cursor-not-allowed", jadwalCurrentPage === jadwalTotalPages);
+    if (nextBtn) {
+      nextBtn.disabled = jadwalCurrentPage === jadwalTotalPages;
+      nextBtn.classList.toggle("opacity-50", jadwalCurrentPage === jadwalTotalPages);
+      nextBtn.classList.toggle("cursor-not-allowed", jadwalCurrentPage === jadwalTotalPages);
     }
 
     if (pageNumbers) {
       pageNumbers.innerHTML = "";
-
       for (let i = 1; i <= jadwalTotalPages; i++) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = i;
-        button.onclick = () => goToJadwalPage(i);
-
-        button.className =
-          i === jadwalCurrentPage
-            ? "h-9 w-9 rounded-lg bg-emerald-500 text-white text-xs font-extrabold"
-            : "h-9 w-9 rounded-lg border border-slate-200 text-slate-600 text-xs font-extrabold hover:bg-slate-50 transition";
-
-        pageNumbers.appendChild(button);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = i;
+        btn.onclick = () => goToJadwalPage(i);
+        btn.className = i === jadwalCurrentPage
+          ? "h-9 w-9 rounded-lg bg-emerald-500 text-white text-xs font-extrabold"
+          : "h-9 w-9 rounded-lg border border-slate-200 text-slate-600 text-xs font-extrabold hover:bg-slate-50 transition";
+        pageNumbers.appendChild(btn);
       }
     }
   }
 
-  function changeJadwalPage(direction) {
-    const nextPage = jadwalCurrentPage + direction;
-
-    if (nextPage < 1 || nextPage > jadwalTotalPages) return;
-
-    jadwalCurrentPage = nextPage;
+  function changeJadwalPage(dir) {
+    const next = jadwalCurrentPage + dir;
+    if (next < 1 || next > jadwalTotalPages) return;
+    jadwalCurrentPage = next;
     renderJadwalPagination();
   }
 
@@ -427,6 +450,103 @@
     jadwalCurrentPage = page;
     renderJadwalPagination();
   }
+
+  /* ── MODAL DETAIL ── */
+  /* done sudah dihitung Python di data-*-done, JS hanya baca nilainya */
+  function openDetailModal(id) {
+    const row = document.querySelector(`.jadwal-row[data-id="${id}"]`);
+    if (!row) return;
+
+    const d = row.dataset;
+
+    /* Header */
+    document.getElementById('modal-petani').textContent       = d.petani;
+    document.getElementById('modal-kelompok-badge').textContent = d.kelompok;
+    document.getElementById('modal-varietas').textContent     = d.varietas;
+    document.getElementById('modal-semai-head').textContent   = d.semai;
+    document.getElementById('modal-kelompok-head').textContent = d.kelompok;
+    document.getElementById('modal-email').textContent        = d.email;
+
+    /* Stats — diambil langsung dari data attribute yang sudah dihitung Python */
+    document.getElementById('modal-durasi').textContent   = d.totalDurasi   || '-';
+    document.getElementById('modal-berjalan').textContent = d.waktuBerjalan  || '0';
+    document.getElementById('modal-sisa').textContent     = d.sisaWaktu      || '0';
+
+    /* Steps — done dibaca dari data-*-done yang di-set Jinja2 */
+    const stepsData = [
+      { label: 'Semai',      icon: 'fa-seedling',             date: d.semai,       done: d.semaiDone      === 'true' },
+      { label: 'Penyemaian', icon: 'fa-droplet',              date: d.penyemaian,  done: d.penyemaianDone === 'true' },
+      { label: 'Penanaman',  icon: 'fa-hand-holding-droplet', date: d.penanaman,   done: d.penanamanDone  === 'true' },
+      { label: 'Pupuk 1',   icon: 'fa-flask',                date: d.pemupukan1,  done: d.pemupukan1Done === 'true' },
+      { label: 'Pupuk 2',   icon: 'fa-flask',                date: d.pemupukan2,  done: d.pemupukan2Done === 'true' },
+      { label: 'Panen',     icon: 'fa-wheat-awn',            date: d.panen,       done: d.panenDone      === 'true' },
+    ];
+
+    /* Hanya tampilkan step yang punya tanggal */
+    const validSteps = stepsData.filter(s => s.date && s.date !== '' && s.date !== '-');
+
+    const doneCount = validSteps.filter(s => s.done).length;
+    const progress  = validSteps.length > 1
+      ? Math.round((doneCount / (validSteps.length - 1)) * 100)
+      : (validSteps.length === 1 && validSteps[0].done ? 100 : 0);
+
+    document.getElementById('modal-steps-track').style.minWidth = (validSteps.length * 90) + 'px';
+    document.getElementById('modal-progress-bar').style.width   = Math.min(progress, 100) + '%';
+
+    document.getElementById('modal-steps').innerHTML = validSteps.map(s => `
+      <div class="flex flex-col items-center" style="width:90px">
+        <div class="h-12 w-12 rounded-full flex items-center justify-center shadow-sm shrink-0
+          ${s.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400 border border-slate-200'}">
+          <i class="fa-solid ${s.icon}"></i>
+        </div>
+        <div class="mt-3 text-[11px] font-extrabold text-center leading-tight w-full px-1
+          ${s.done ? 'text-slate-800' : 'text-slate-400'}">
+          ${s.label}
+        </div>
+        <div class="mt-1 text-[10px] text-center w-full px-1
+          ${s.done ? 'text-emerald-600' : 'text-slate-400'}">
+          ${s.date || '-'}
+        </div>
+      </div>`).join('');
+
+    /* Ringkasan */
+    const fields = [
+      { label: 'Petani',              value: d.petani },
+      { label: 'Email',               value: d.email },
+      { label: 'Kelompok Tani',       value: d.kelompok },
+      { label: 'Varietas',            value: d.varietas },
+      { label: 'Tanggal Semai',       value: d.semai },
+      ...(d.penyemaian  ? [{ label: 'Tanggal Penyemaian', value: d.penyemaian  }] : []),
+      ...(d.penanaman   ? [{ label: 'Tanggal Penanaman',  value: d.penanaman   }] : []),
+      ...(d.pemupukan1  ? [{ label: 'Pemupukan 1',        value: d.pemupukan1  }] : []),
+      ...(d.pemupukan2  ? [{ label: 'Pemupukan 2',        value: d.pemupukan2  }] : []),
+      { label: 'Tanggal Panen',       value: d.panen },
+      { label: 'Dibuat',              value: d.created },
+    ];
+
+    document.getElementById('modal-ringkasan').innerHTML = fields.map(f => `
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div class="text-xs font-extrabold text-slate-500">${f.label}</div>
+        <div class="mt-1 text-sm font-bold text-slate-800">${f.value || '-'}</div>
+      </div>`).join('');
+
+    const modal = document.getElementById('detailJadwalModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeDetailModal() {
+    const modal = document.getElementById('detailJadwalModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  document.addEventListener('click', e => {
+    if (e.target === document.getElementById('detailJadwalModal')) closeDetailModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDetailModal();
+  });
 </script>
 </body>
 </html>

@@ -1,137 +1,203 @@
-<!-- brand -->
-<div class="px-6 py-6 flex items-center gap-3">
-  <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-    <i class="fa-solid fa-leaf text-emerald-600"></i>
+<div class="flex flex-col h-full">
+
+  <!-- BRAND -->
+  <div class="px-6 py-6 flex items-center gap-3 border-b border-slate-100">
+    <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+      <i class="fa-solid fa-leaf text-emerald-600"></i>
+    </div>
+    <div class="font-extrabold tracking-tight text-lg text-slate-800">
+      SIPADI
+    </div>
   </div>
-  <div class="font-extrabold tracking-tight">SIPADI</div>
-</div>
 
-<!-- nav -->
-<nav class="px-4 space-y-2">
+  <!-- MENU -->
+  <nav class="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
 
-  <!-- BERANDA -->
-  <a href="{{ url_for('auth.admin_dashboard') }}"
-     class="flex items-center gap-3 px-4 py-3 rounded-xl
-     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'beranda_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
-    <i class="fa-solid fa-table-cells-large w-5
-       {{ 'text-white' if active == 'beranda_admin' else 'text-emerald-500' }}">
-    </i>
-    <span class="font-semibold text-sm">Beranda</span>
-  </a>
-
-  <!-- DETEKSI PENYAKIT -->
-  <a href="{{ url_for('deteksi_admin') }}"
-     class="flex items-center gap-3 px-4 py-3 rounded-xl
-     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'deteksi_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
-    <i class="fa-solid fa-magnifying-glass-chart w-5
-       {{ 'text-white' if active == 'deteksi_admin' else 'text-emerald-500' }}">
-    </i>
-    <span class="font-semibold text-sm">Deteksi Penyakit</span>
-  </a>
-
-  <!-- RIWAYAT DETEKSI -->
-  <a href="{{ url_for('riwayat_admin') }}"
-     class="flex items-center gap-3 px-4 py-3 rounded-xl
-     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'riwayat_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
-    <i class="fa-solid fa-clock-rotate-left w-5
-       {{ 'text-white' if active == 'riwayat_admin' else 'text-emerald-500' }}">
-    </i>
-    <span class="font-semibold text-sm">Riwayat Deteksi</span>
-  </a>
-
-  <!-- KELOLA AKUN -->
-  <a href="{{ url_for('auth.users') }}"
-     class="flex items-center gap-3 px-4 py-3 rounded-xl
-     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'users_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
-    <i class="fa-solid fa-user-group w-5
-       {{ 'text-white' if active == 'users_admin' else 'text-emerald-500' }}">
-    </i>
-    <span class="font-semibold text-sm">Kelola Akun</span>
-  </a>
-
-  <!-- VARIETAS PADI -->
-  <a href="{{ url_for('auth.varietas') }}"
-     class="flex items-center gap-3 px-4 py-3 rounded-xl
-     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'varietas_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
-    <i class="fa-solid fa-seedling w-5
-       {{ 'text-white' if active == 'varietas_admin' else 'text-emerald-500' }}">
-    </i>
-    <span class="font-semibold text-sm">Varietas Padi</span>
-  </a>
-
-  <!-- KELOMPOK TANI -->
-  <a href="{{ url_for('auth.kelompok_tani_admin') }}"
-     class="flex items-center gap-3 px-4 py-3 rounded-xl
-     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'kelompok_tani_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
-    <i class="fa-solid fa-people-group w-5
-       {{ 'text-white' if active == 'kelompok_tani_admin' else 'text-emerald-500' }}">
-    </i>
-    <span class="font-semibold text-sm">Kelompok Tani</span>
-  </a>
-
-  <!-- JADWAL PETANI -->
-  <a href="{{ url_for('auth.admin_jadwal_petani') }}"
-     class="flex items-center gap-3 px-4 py-3 rounded-xl
-     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'jadwal_petani_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
-    <i class="fa-solid fa-calendar-days w-5
-       {{ 'text-white' if active == 'jadwal_petani_admin' else 'text-emerald-500' }}">
-    </i>
-    <span class="font-semibold text-sm">Jadwal Petani</span>
-  </a>
-
-  <!-- PROFIL ADMIN -->
-  <a href="{{ url_for('auth.profile_admin') }}"
-     class="flex items-center gap-3 px-4 py-3 rounded-xl
-     {{ 'bg-emerald-500 text-white shadow-sm' if active == 'profile_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
-    <i class="fa-solid fa-user w-5
-       {{ 'text-white' if active == 'profile_admin' else 'text-emerald-500' }}">
-    </i>
-    <span class="font-semibold text-sm">Profil Saya</span>
-  </a>
-
-</nav>
-
-<!-- ADMIN INFO + LOGOUT -->
-<div class="mt-auto p-4">
-  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-between hover:bg-slate-100 transition">
-
-    <!-- KIRI: PROFILE -->
-    <a href="{{ url_for('auth.profile_admin') }}" class="flex items-center gap-3 min-w-0">
-
-      <!-- FOTO PROFIL -->
-      <div class="h-10 w-10 rounded-full overflow-hidden border border-amber-200 bg-white shrink-0">
-        {% if current_user.is_authenticated and current_user.profile_image %}
-          <img src="{{ current_user.profile_image }}" alt="Foto Admin" class="h-full w-full object-cover">
-        {% elif current_user.is_authenticated %}
-          <img src="https://ui-avatars.com/api/?name={{ current_user.fullname|urlencode }}&background=FEF3C7&color=92400E&size=200" alt="Avatar Admin" class="h-full w-full object-cover">
-        {% else %}
-          <div class="h-full w-full bg-amber-100 flex items-center justify-center">
-            <i class="fa-solid fa-user text-amber-700"></i>
-          </div>
-        {% endif %}
-      </div>
-
-      <!-- INFO -->
-      <div class="leading-tight min-w-0">
-        {% if current_user.is_authenticated %}
-          <div class="text-sm font-bold truncate">{{ current_user.fullname }}</div>
-          <div class="text-xs text-slate-500 truncate">{{ current_user.email }}</div>
-        {% else %}
-          <div class="text-sm font-bold">Administrator</div>
-          <div class="text-xs text-slate-500">admin@ricehealth.com</div>
-        {% endif %}
-      </div>
-
+    <!-- BERANDA -->
+    <a href="{{ url_for('auth.admin_dashboard') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl
+       {{ 'bg-emerald-500 text-white shadow-sm' if active == 'beranda_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+      <i class="fa-solid fa-table-cells-large w-5
+         {{ 'text-white' if active == 'beranda_admin' else 'text-emerald-500' }}"></i>
+      <span class="font-semibold text-sm">Beranda</span>
     </a>
 
-    <!-- KANAN: LOGOUT -->
-    {% if current_user.is_authenticated %}
+    <!-- DETEKSI PENYAKIT -->
+    <div>
+      <button onclick="toggleMenu('deteksi')"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-xl
+              {{ 'bg-emerald-500 text-white shadow-sm' if active in ['deteksi_admin','riwayat_admin'] else 'text-slate-600 hover:bg-slate-50 transition' }}">
+
+        <i class="fa-solid fa-magnifying-glass-chart w-5
+           {{ 'text-white' if active in ['deteksi_admin','riwayat_admin'] else 'text-emerald-500' }}"></i>
+
+        <span class="font-semibold text-sm">
+          Deteksi Penyakit
+        </span>
+
+        <i id="chevron-deteksi"
+           class="fa-solid fa-chevron-down ml-auto text-xs transition-transform duration-200
+           {{ 'rotate-180' if active in ['deteksi_admin','riwayat_admin'] else '' }}">
+        </i>
+      </button>
+
+      <div id="submenu-deteksi"
+           class="{{ '' if active in ['deteksi_admin','riwayat_admin'] else 'hidden' }} pl-4 mt-1 space-y-1">
+
+        <a href="{{ url_for('deteksi_admin') }}"
+           class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-semibold
+           {{ 'bg-emerald-50 text-emerald-600' if active == 'deteksi_admin' else 'text-slate-500 hover:bg-slate-50' }}">
+
+          <span class="w-2 h-2 rounded-full
+          {{ 'bg-emerald-500' if active == 'deteksi_admin' else 'bg-slate-300' }}"></span>
+
+          Deteksi Baru
+        </a>
+
+        <a href="{{ url_for('riwayat_admin') }}"
+           class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-semibold
+           {{ 'bg-emerald-50 text-emerald-600' if active == 'riwayat_admin' else 'text-slate-500 hover:bg-slate-50' }}">
+
+          <span class="w-2 h-2 rounded-full
+          {{ 'bg-emerald-500' if active == 'riwayat_admin' else 'bg-slate-300' }}"></span>
+
+          Riwayat Deteksi
+        </a>
+
+      </div>
+    </div>
+
+    <!-- KELOLA AKUN -->
+    <a href="{{ url_for('auth.users') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl
+       {{ 'bg-emerald-500 text-white shadow-sm' if active == 'users_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+
+      <i class="fa-solid fa-users w-5
+      {{ 'text-white' if active == 'users_admin' else 'text-emerald-500' }}"></i>
+
+      <span class="font-semibold text-sm">Kelola Akun</span>
+    </a>
+
+    <!-- VARIETAS PADI -->
+    <a href="{{ url_for('auth.varietas') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl
+       {{ 'bg-emerald-500 text-white shadow-sm' if active == 'varietas_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+
+      <i class="fa-solid fa-seedling w-5
+      {{ 'text-white' if active == 'varietas_admin' else 'text-emerald-500' }}"></i>
+
+      <span class="font-semibold text-sm">Varietas Padi</span>
+    </a>
+
+    <!-- KELOMPOK TANI -->
+    <div>
+      <button onclick="toggleMenu('kelompok')"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-xl
+              {{ 'bg-emerald-500 text-white shadow-sm' if active in ['kelompok_tani_admin','jadwal_petani_admin'] else 'text-slate-600 hover:bg-slate-50 transition' }}">
+
+        <i class="fa-solid fa-people-group w-5
+        {{ 'text-white' if active in ['kelompok_tani_admin','jadwal_petani_admin'] else 'text-emerald-500' }}"></i>
+
+        <span class="font-semibold text-sm">
+          Kelompok Tani
+        </span>
+
+        <i id="chevron-kelompok"
+           class="fa-solid fa-chevron-down ml-auto text-xs transition-transform duration-200
+           {{ 'rotate-180' if active in ['kelompok_tani_admin','jadwal_petani_admin'] else '' }}">
+        </i>
+      </button>
+
+      <div id="submenu-kelompok"
+           class="{{ '' if active in ['kelompok_tani_admin','jadwal_petani_admin'] else 'hidden' }} pl-4 mt-1 space-y-1">
+
+        <a href="{{ url_for('auth.kelompok_tani_admin') }}"
+           class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-semibold
+           {{ 'bg-emerald-50 text-emerald-600' if active == 'kelompok_tani_admin' else 'text-slate-500 hover:bg-slate-50' }}">
+
+          <span class="w-2 h-2 rounded-full
+          {{ 'bg-emerald-500' if active == 'kelompok_tani_admin' else 'bg-slate-300' }}"></span>
+
+          Daftar Kelompok
+        </a>
+
+        <a href="{{ url_for('auth.admin_jadwal_petani') }}"
+           class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-semibold
+           {{ 'bg-emerald-50 text-emerald-600' if active == 'jadwal_petani_admin' else 'text-slate-500 hover:bg-slate-50' }}">
+
+          <span class="w-2 h-2 rounded-full
+          {{ 'bg-emerald-500' if active == 'jadwal_petani_admin' else 'bg-slate-300' }}"></span>
+
+          Jadwal Petani
+        </a>
+
+      </div>
+    </div>
+
+    <!-- PROFIL -->
+    <a href="{{ url_for('auth.profile_admin') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl
+       {{ 'bg-emerald-500 text-white shadow-sm' if active == 'profile_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+
+      <i class="fa-solid fa-user w-5
+      {{ 'text-white' if active == 'profile_admin' else 'text-emerald-500' }}"></i>
+
+      <span class="font-semibold text-sm">Profil Saya</span>
+    </a>
+
+  </nav>
+
+  <!-- FOOTER ADMIN -->
+  <div class="mt-auto p-4 border-t border-slate-100 bg-white">
+
+    <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-between">
+
+      <a href="{{ url_for('auth.profile_admin') }}"
+         class="flex items-center gap-3 min-w-0">
+
+        <div class="h-10 w-10 rounded-full overflow-hidden border border-amber-200 bg-white">
+
+          {% if current_user.is_authenticated and current_user.profile_image %}
+            <img src="{{ current_user.profile_image }}"
+                 class="h-full w-full object-cover">
+          {% else %}
+            <img src="https://ui-avatars.com/api/?name={{ current_user.fullname|urlencode }}&background=FEF3C7&color=92400E&size=200"
+                 class="h-full w-full object-cover">
+          {% endif %}
+
+        </div>
+
+        <div class="leading-tight min-w-0">
+          <div class="text-sm font-bold truncate">
+            {{ current_user.fullname }}
+          </div>
+
+          <div class="text-xs text-slate-500 truncate">
+            {{ current_user.email }}
+          </div>
+        </div>
+
+      </a>
+
       <a href="{{ url_for('auth.logout') }}"
-         class="ml-3 text-slate-500 hover:text-red-500 transition shrink-0"
+         class="ml-3 text-slate-500 hover:text-red-500 transition"
          title="Logout">
+
         <i class="fa-solid fa-right-from-bracket text-lg"></i>
       </a>
-    {% endif %}
+
+    </div>
 
   </div>
+
 </div>
+
+<script>
+function toggleMenu(id) {
+    const submenu = document.getElementById('submenu-' + id);
+    const chevron = document.getElementById('chevron-' + id);
+
+    submenu.classList.toggle('hidden');
+    chevron.classList.toggle('rotate-180');
+}
+</script>

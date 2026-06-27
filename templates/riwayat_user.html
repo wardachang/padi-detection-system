@@ -175,7 +175,7 @@
           </div>
 
           <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3 sm:p-5">
-            <div class="text-[10px] sm:text-xs font-semibold text-slate-500">Avg Confidence</div>
+            <div class="text-[10px] sm:text-xs font-semibold text-slate-500">Rata-rata Akurasi</div>
             <div class="mt-2 text-xl sm:text-2xl font-extrabold">
               {% if histories|length > 0 %}
                 {{ "%.1f"|format((histories | map(attribute='confidence') | sum) / (histories|length)) }}%
@@ -183,7 +183,7 @@
                 0.0%
               {% endif %}
             </div>
-            <div class="text-[10px] sm:text-xs font-extrabold text-emerald-600">Model CNN</div>
+            <div class="text-[10px] sm:text-xs font-extrabold text-emerald-600">Skor Prediksi</div>
           </div>
         </div>
 
@@ -204,7 +204,7 @@
                   <th class="px-6 py-4">PRATINJAU</th>
                   <th class="px-6 py-4">INFO DETEKSI</th>
                   <th class="px-6 py-4">STATUS</th>
-                  <th class="px-6 py-4">KEPERCAYAAN CNN</th>
+                  <th class="px-6 py-4">AKURASI</th>
                   <th class="px-6 py-4 text-right">AKSI</th>
                 </tr>
               </thead>
@@ -453,7 +453,7 @@
           <h2 id="modalResult" class="mt-2 text-xl sm:text-2xl font-extrabold text-slate-900"></h2>
 
           <div class="mt-4 text-sm font-bold text-slate-700">
-            Confidence: <span id="modalConfidence"></span>%
+            Akurasi: <span id="modalConfidence"></span>%
           </div>
 
           <div class="mt-6">

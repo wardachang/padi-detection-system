@@ -10,9 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
-    body {
-      font-family: "Inter", sans-serif;
-    }
+    body { font-family: "Inter", sans-serif; }
 
     #sidebar-overlay {
       display: none;
@@ -21,16 +19,11 @@
       background: rgba(0,0,0,0.4);
       z-index: 30;
     }
-
-    #sidebar-overlay.active {
-      display: block;
-    }
+    #sidebar-overlay.active { display: block; }
 
     #sidebar {
       position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
+      top: 0; left: 0; bottom: 0;
       width: 272px;
       z-index: 40;
       display: flex;
@@ -41,10 +34,7 @@
       border-right: 1px solid #e2e8f0;
       overflow-y: auto;
     }
-
-    #sidebar.open {
-      transform: translateX(0);
-    }
+    #sidebar.open { transform: translateX(0); }
 
     @media (min-width: 1024px) {
       #sidebar {
@@ -55,15 +45,127 @@
         width: 272px;
         height: 100vh;
       }
-
-      #sidebar-overlay {
-        display: none !important;
-      }
-
-      #mobile-menu-btn {
-        display: none !important;
-      }
+      #sidebar-overlay { display: none !important; }
+      #mobile-menu-btn { display: none !important; }
     }
+
+    /* Modal */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.5);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #modal-overlay.active {
+      display: flex;
+    }
+    #modal-box {
+      background: white;
+      border-radius: 1.25rem;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.18);
+      animation: slideUp 0.22s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(24px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* Table row hover */
+    .group-row:hover { background: #f0fdf4; }
+
+    /* Badge */
+    .badge-anggota {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #d1fae5;
+      color: #065f46;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+
+    /* Checkbox custom */
+    input[type="checkbox"] {
+      accent-color: #10b981;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* ── Center Toast ── */
+    #toast-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .toast-popup {
+      pointer-events: auto;
+      min-width: 260px;
+      max-width: 340px;
+      background: #fff;
+      border-radius: 1.25rem;
+      padding: 28px 28px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
+      opacity: 0;
+      transform: scale(0.82);
+      transition: opacity 0.25s cubic-bezier(.34,1.56,.64,1), transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    }
+    .toast-popup.show { opacity: 1; transform: scale(1); }
+    .toast-popup.hide { opacity: 0; transform: scale(0.82); transition: opacity 0.2s ease, transform 0.2s ease; }
+    .toast-icon-wrap {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+    .toast-success .toast-icon-wrap { background: #d1fae5; color: #059669; border: 2px solid #a7f3d0; }
+    .toast-error   .toast-icon-wrap { background: #fee2e2; color: #dc2626; border: 2px solid #fca5a5; }
+    .toast-title { font-size: 1rem; font-weight: 800; color: #0f172a; }
+    .toast-success .toast-title { color: #065f46; }
+    .toast-error   .toast-title { color: #991b1b; }
+    .toast-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.25);
+      z-index: 9998;
+    }
+    .toast-backdrop.active { display: block; }
+
+    /* Delete confirm dialog */
+    #confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.5);
+      z-index: 60;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #confirm-overlay.active { display: flex; }
   </style>
 </head>
 
@@ -83,268 +185,425 @@
 
     <!-- Topbar Mobile -->
     <div class="sticky top-0 z-30 h-14 border-b border-slate-200 bg-white flex items-center px-4 gap-3 shrink-0">
-      <button
-        id="mobile-menu-btn"
-        onclick="openSidebar()"
-        class="p-2 rounded-lg hover:bg-slate-100 transition lg:hidden"
-        aria-label="Buka menu"
-      >
+      <button id="mobile-menu-btn" onclick="openSidebar()"
+        class="p-2 rounded-lg hover:bg-slate-100 transition lg:hidden" aria-label="Buka menu">
         <i class="fa-solid fa-bars text-slate-600"></i>
       </button>
-
-      <span class="font-extrabold text-sm text-slate-700">
-        Kelompok Tani
-      </span>
+      <span class="font-extrabold text-sm text-slate-700">Kelompok Tani</span>
     </div>
 
-    <div class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+    <div class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 md:py-8">
 
-      <!-- FLASH MESSAGE -->
+      <!-- FLASH MESSAGE (Center Toast) -->
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          <div id="flash-container" class="fixed top-5 right-3 sm:right-5 z-50 space-y-3">
+          <div class="toast-backdrop" id="toast-backdrop"></div>
+          <div id="toast-container">
             {% for category, message in messages %}
-              <div class="flash-message min-w-[220px] max-w-xs rounded-xl px-4 py-3 shadow-lg flex items-start gap-3 transition-all duration-500 opacity-0 translate-x-10
-                {% if category == 'success' %}
-                  bg-green-100 text-green-700 border border-green-200
-                {% else %}
-                  bg-red-100 text-red-700 border border-red-200
-                {% endif %}">
-                <div class="mt-1 shrink-0">
+              <div class="toast-popup toast-{{ category }}" onclick="this.parentElement.remove(); document.getElementById('toast-backdrop').classList.remove('active');">
+                <div class="toast-icon-wrap">
                   {% if category == 'success' %}
-                    <i class="fa-solid fa-circle-check text-green-600"></i>
+                    <i class="fa-solid fa-circle-check"></i>
                   {% else %}
-                    <i class="fa-solid fa-circle-xmark text-red-600"></i>
+                    <i class="fa-solid fa-circle-xmark"></i>
                   {% endif %}
                 </div>
-                <div class="text-sm font-semibold">{{ message }}</div>
+                <div class="toast-title">{{ message }}</div>
+                <div style="font-size:0.72rem;color:#94a3b8;margin-top:4px;">Klik untuk tutup</div>
               </div>
             {% endfor %}
           </div>
         {% endif %}
       {% endwith %}
 
-      <!-- HEADER -->
-      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
+      <!-- PAGE HEADER -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold">
-            Kelola Kelompok Tani
-          </h1>
-          <p class="text-slate-500 text-sm mt-1">
-            Tambahkan kelompok tani dan atur anggota petani pada setiap kelompok.
-          </p>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900">Kelompok Tani</h1>
+          <p class="text-slate-500 text-sm mt-1">Kelola grup dan anggota petani terdaftar.</p>
         </div>
+        <button
+          onclick="openModal()"
+          class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 transition px-5 py-2.5 text-sm font-extrabold text-white shadow-sm shrink-0"
+        >
+          <i class="fa-solid fa-plus"></i>
+          Tambah Kelompok
+        </button>
+      </div>
 
-        <div class="rounded-xl bg-emerald-100 px-4 py-2 text-sm font-extrabold text-emerald-700 w-fit">
-          Total: {{ kelompok_tani_list|length }} kelompok
+      <!-- STATS ROW -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 flex items-center gap-3">
+          <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-people-group text-emerald-600"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-extrabold text-slate-900">{{ kelompok_tani_list|length }}</div>
+            <div class="text-xs text-slate-500 font-semibold">Total Kelompok</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 flex items-center gap-3">
+          <div class="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-user text-blue-600"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-extrabold text-slate-900">{{ users|length }}</div>
+            <div class="text-xs text-slate-500 font-semibold">Total Petani</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 flex items-center gap-3 col-span-2 sm:col-span-1">
+          <div class="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-user-check text-amber-600"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-extrabold text-slate-900">
+              {% set total_anggota = namespace(val=0) %}
+              {% for k in kelompok_tani_list %}{% set total_anggota.val = total_anggota.val + k.anggota|length %}{% endfor %}
+              {{ total_anggota.val }}
+            </div>
+            <div class="text-xs text-slate-500 font-semibold">Petani Terdaftar</div>
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-        <!-- FORM TAMBAH KELOMPOK -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 h-fit">
-          <div class="flex items-center gap-3 mb-5">
-            <div class="h-11 w-11 rounded-2xl bg-emerald-100 flex items-center justify-center">
-              <i class="fa-solid fa-users text-emerald-600"></i>
-            </div>
-
-            <div>
-              <h2 class="font-extrabold text-slate-900">
-                Tambah Kelompok
-              </h2>
-              <p class="text-xs text-slate-500">
-                Data grup tani baru
-              </p>
-            </div>
+      <!-- LIST TABLE -->
+      {% if kelompok_tani_list %}
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <!-- Table Head -->
+          <div class="hidden sm:grid sm:grid-cols-12 gap-0 px-5 py-3 border-b border-slate-100 bg-slate-50">
+            <div class="col-span-1 text-xs font-extrabold uppercase tracking-widest text-slate-400">#</div>
+            <div class="col-span-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">Nama Kelompok</div>
+            <div class="col-span-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">Deskripsi</div>
+            <div class="col-span-2 text-xs font-extrabold uppercase tracking-widest text-slate-400">Anggota</div>
+            <div class="col-span-1 text-xs font-extrabold uppercase tracking-widest text-slate-400 text-right">Aksi</div>
           </div>
 
-          <form method="POST" action="{{ url_for('auth.kelompok_tani_admin') }}" class="space-y-4">
-            <div>
-              <label class="block mb-2 text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                Nama Kelompok
-              </label>
-              <input
-                type="text"
-                name="nama"
-                placeholder="Contoh: Kelompok Tani 2"
-                class="w-full h-12 rounded-xl border border-slate-200 px-4 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                required
-              />
-            </div>
+          <!-- Table Body -->
+          {% for kelompok in kelompok_tani_list %}
+            {% set anggota_ids = kelompok.anggota | map(attribute='id') | list %}
+            <div class="group-row border-b border-slate-100 last:border-0 px-5 py-4 transition
+                        flex flex-col sm:grid sm:grid-cols-12 sm:items-center gap-3 sm:gap-0">
 
-            <div>
-              <label class="block mb-2 text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                Deskripsi
-              </label>
-              <textarea
-                name="deskripsi"
-                rows="4"
-                placeholder="Keterangan kelompok tani"
-                class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-              ></textarea>
-            </div>
+              <!-- No -->
+              <div class="hidden sm:block col-span-1 text-sm text-slate-400 font-semibold">{{ loop.index }}</div>
 
-            <button
-              type="submit"
-              class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-extrabold text-white hover:bg-emerald-600 transition"
-            >
-              <i class="fa-solid fa-floppy-disk"></i>
-              Simpan Kelompok
-            </button>
-          </form>
-        </section>
-
-        <!-- LIST KELOMPOK -->
-        <section class="lg:col-span-2 space-y-4">
-          {% if kelompok_tani_list %}
-            {% for kelompok in kelompok_tani_list %}
-              {% set anggota_ids = kelompok.anggota | map(attribute='id') | list %}
-
-              <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-
-                <!-- HEADER CARD -->
-                <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <div>
-                    <div class="flex items-center gap-3">
-                      <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-people-group text-emerald-600"></i>
-                      </div>
-
-                      <div>
-                        <h3 class="font-extrabold text-slate-900">
-                          {{ kelompok.nama }}
-                        </h3>
-                        <p class="text-xs text-slate-500 mt-0.5">
-                          {{ kelompok.deskripsi if kelompok.deskripsi else 'Tidak ada deskripsi.' }}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div class="mt-3 inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
-                      {{ kelompok.anggota|length }} anggota terdaftar
-                    </div>
-                  </div>
-
-                  <form
-                    method="POST"
-                    action="{{ url_for('auth.hapus_kelompok_tani', id=kelompok.id) }}"
-                    onsubmit="return confirm('Hapus kelompok tani ini?')"
-                  >
-                    <button
-                      type="submit"
-                      class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-xs font-extrabold text-white hover:bg-red-600 transition"
-                    >
-                      <i class="fa-solid fa-trash"></i>
-                      Hapus
-                    </button>
-                  </form>
+              <!-- Nama + Mobile badge -->
+              <div class="col-span-4 flex items-center gap-3">
+                <div class="h-9 w-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-people-group text-emerald-600 text-sm"></i>
                 </div>
-
-                <!-- FORM ANGGOTA -->
-                <form method="POST" action="{{ url_for('auth.atur_anggota_kelompok_tani', id=kelompok.id) }}">
-                  <div class="p-5">
-                    <div class="mb-3 text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                      Pilih Anggota Petani
-                    </div>
-
-                    {% if users %}
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
-                        {% for user in users %}
-                          <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition">
-                            <input
-                              type="checkbox"
-                              name="user_ids"
-                              value="{{ user.id }}"
-                              class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                              {% if user.id in anggota_ids %}checked{% endif %}
-                            />
-
-                            <div class="min-w-0">
-                              <div class="text-sm font-extrabold text-slate-800 truncate">
-                                {{ user.fullname }}
-                              </div>
-                              <div class="text-xs text-slate-500 truncate">
-                                {{ user.email }}
-                              </div>
-                            </div>
-                          </label>
-                        {% endfor %}
-                      </div>
-                    {% else %}
-                      <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-500">
-                        Belum ada user petani.
-                      </div>
-                    {% endif %}
-                  </div>
-
-                  <div class="px-5 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
-                    <button
-                      type="submit"
-                      class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-extrabold text-white hover:bg-emerald-600 transition"
-                    >
-                      <i class="fa-solid fa-user-check"></i>
-                      Simpan Anggota
-                    </button>
-                  </div>
-                </form>
-              </div>
-            {% endfor %}
-          {% else %}
-            <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center">
-              <div class="mx-auto h-16 w-16 rounded-2xl bg-emerald-100 flex items-center justify-center">
-                <i class="fa-solid fa-people-group text-emerald-600 text-2xl"></i>
+                <div>
+                  <div class="font-extrabold text-slate-800 text-sm">{{ kelompok.nama }}</div>
+                  <span class="sm:hidden badge-anggota mt-1">
+                    <i class="fa-solid fa-user text-[10px]"></i>
+                    {{ kelompok.anggota|length }} anggota
+                  </span>
+                </div>
               </div>
 
-              <h3 class="mt-4 text-lg font-extrabold text-slate-800">
-                Belum ada kelompok tani
-              </h3>
+              <!-- Deskripsi -->
+              <div class="col-span-4 text-sm text-slate-500 truncate max-w-[220px]">
+                {{ kelompok.deskripsi if kelompok.deskripsi else '—' }}
+              </div>
 
-              <p class="mt-2 text-sm text-slate-500">
-                Tambahkan kelompok tani terlebih dahulu melalui form di sebelah kiri.
-              </p>
+              <!-- Anggota badge desktop -->
+              <div class="hidden sm:block col-span-2">
+                <span class="badge-anggota">
+                  <i class="fa-solid fa-user text-[10px]"></i>
+                  {{ kelompok.anggota|length }} anggota
+                </span>
+              </div>
+
+              <!-- Aksi -->
+              <div class="col-span-1 flex items-center justify-end gap-2">
+                <!-- Edit button: buka modal dengan data kelompok ini -->
+                <button
+                  onclick="openEditModal({{ kelompok.id }}, '{{ kelompok.nama | e }}', '{{ kelompok.deskripsi | e }}', {{ anggota_ids | tojson }})"
+                  class="h-8 w-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition flex items-center justify-center"
+                  title="Edit kelompok"
+                >
+                  <i class="fa-solid fa-pen text-xs"></i>
+                </button>
+                <!-- Hapus -->
+                <button
+                  onclick="confirmHapus('{{ kelompok.id }}', '{{ kelompok.nama | e }}')"
+                  class="h-8 w-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition flex items-center justify-center"
+                  title="Hapus kelompok"
+                >
+                  <i class="fa-solid fa-trash text-xs"></i>
+                </button>
+              </div>
             </div>
-          {% endif %}
-        </section>
+          {% endfor %}
+        </div>
 
-      </div>
+      {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-2xl border border-dashed border-slate-300 p-14 text-center">
+          <div class="mx-auto h-16 w-16 rounded-2xl bg-emerald-100 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-people-group text-emerald-500 text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-extrabold text-slate-800">Belum ada kelompok tani</h3>
+          <p class="text-sm text-slate-500 mt-1 mb-5">Mulai dengan menambahkan kelompok tani pertama.</p>
+          <button onclick="openModal()"
+            class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 transition px-5 py-2.5 text-sm font-extrabold text-white">
+            <i class="fa-solid fa-plus"></i>
+            Tambah Kelompok
+          </button>
+        </div>
+      {% endif %}
+
     </div>
   </main>
 </div>
 
+<!-- ============================================================
+     MODAL: Tambah / Edit Kelompok
+     ============================================================ -->
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div id="modal-box">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-people-group text-emerald-600" id="modal-icon"></i>
+        </div>
+        <div>
+          <h2 class="font-extrabold text-slate-900" id="modal-title">Tambah Kelompok</h2>
+          <p class="text-xs text-slate-500" id="modal-subtitle">Isi data kelompok baru</p>
+        </div>
+      </div>
+      <button onclick="closeModal()" class="h-8 w-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Form Body -->
+    <form id="modal-form" method="POST" action="{{ url_for('auth.kelompok_tani_admin') }}">
+      <div class="px-6 py-5 space-y-5">
+
+        <!-- Nama -->
+        <div>
+          <label class="block mb-1.5 text-xs font-extrabold uppercase tracking-widest text-slate-500">
+            Nama Kelompok <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="nama"
+            id="modal-nama"
+            placeholder="Contoh: Kelompok Tani Sejahtera"
+            class="w-full h-11 rounded-xl border border-slate-200 px-4 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition"
+            required
+          />
+        </div>
+
+        <!-- Deskripsi -->
+        <div>
+          <label class="block mb-1.5 text-xs font-extrabold uppercase tracking-widest text-slate-500">
+            Deskripsi
+          </label>
+          <textarea
+            name="deskripsi"
+            id="modal-deskripsi"
+            rows="3"
+            placeholder="Keterangan singkat tentang kelompok ini"
+            class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Pilih Anggota -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-extrabold uppercase tracking-widest text-slate-500">
+              Pilih Anggota Petani
+            </label>
+            <span id="anggota-count" class="text-xs font-bold text-emerald-600">0 dipilih</span>
+          </div>
+
+          {% if users %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1" id="user-list">
+              {% for user in users %}
+                <label
+                  class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 cursor-pointer hover:bg-emerald-50 hover:border-emerald-300 transition has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-300"
+                >
+                  <input
+                    type="checkbox"
+                    name="user_ids"
+                    value="{{ user.id }}"
+                    class="anggota-cb rounded"
+                    onchange="updateAnggotaCount()"
+                  />
+                  <div class="min-w-0">
+                    <div class="text-sm font-bold text-slate-800 truncate">{{ user.fullname }}</div>
+                    <div class="text-xs text-slate-400 truncate">{{ user.email }}</div>
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-400">
+              Belum ada user petani terdaftar.
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl flex items-center justify-between gap-3">
+        <button type="button" onclick="closeModal()"
+          class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-600 hover:bg-slate-50 transition">
+          Batal
+        </button>
+        <button type="submit"
+          class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 transition px-5 py-2.5 text-sm font-extrabold text-white">
+          <i class="fa-solid fa-floppy-disk" id="modal-btn-icon"></i>
+          <span id="modal-btn-text">Simpan Kelompok</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     CONFIRM DELETE DIALOG
+     ============================================================ -->
+<div id="confirm-overlay">
+  <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-auto text-center">
+    <div class="mx-auto h-14 w-14 rounded-2xl bg-red-100 flex items-center justify-center mb-4">
+      <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl"></i>
+    </div>
+    <h3 class="font-extrabold text-slate-800 text-lg">Hapus Kelompok?</h3>
+    <p class="text-sm text-slate-500 mt-1 mb-5">
+      Kelompok <strong id="confirm-nama"></strong> akan dihapus permanen.
+    </p>
+    <div class="flex gap-3">
+      <button onclick="cancelHapus()"
+        class="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-extrabold text-slate-600 hover:bg-slate-50 transition">
+        Batal
+      </button>
+      <form id="hapus-form" method="POST">
+        <button type="submit"
+          class="rounded-xl bg-red-500 hover:bg-red-600 transition py-2.5 px-5 text-sm font-extrabold text-white">
+          Ya, Hapus
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
+  /* ── Sidebar ── */
   function openSidebar() {
     document.getElementById('sidebar').classList.add('open');
     document.getElementById('sidebar-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
   }
-
   function closeSidebar() {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('active');
     document.body.style.overflow = '';
   }
 
+  /* ── Center Toast ── */
   window.addEventListener("DOMContentLoaded", () => {
-    const flashMessages = document.querySelectorAll(".flash-message");
+    const toasts = document.querySelectorAll(".toast-popup");
+    const backdrop = document.getElementById("toast-backdrop");
 
-    flashMessages.forEach((msg, index) => {
+    if (toasts.length === 0) return;
+
+    // Tampilkan backdrop
+    if (backdrop) backdrop.classList.add("active");
+
+    toasts.forEach((toast, i) => {
+      // Muncul dengan bounce
+      setTimeout(() => toast.classList.add("show"), 60 + i * 120);
+
+      // Auto hilang setelah 2.8 detik
       setTimeout(() => {
-        msg.classList.add("translate-x-0", "opacity-100");
-      }, index * 100);
-
-      setTimeout(() => {
-        msg.classList.add("opacity-0", "translate-x-10");
-
+        toast.classList.add("hide");
         setTimeout(() => {
-          msg.remove();
-        }, 500);
-      }, 3000);
-
-      msg.addEventListener("click", () => {
-        msg.remove();
-      });
+          toast.remove();
+          if (document.querySelectorAll(".toast-popup").length === 0) {
+            if (backdrop) backdrop.classList.remove("active");
+          }
+        }, 220);
+      }, 2800 + i * 120);
     });
+  });
+
+  /* ── Modal helpers ── */
+  const modalOverlay = document.getElementById('modal-overlay');
+  const modalForm    = document.getElementById('modal-form');
+
+  function openModal() {
+    // Reset ke mode Tambah
+    document.getElementById('modal-title').textContent    = 'Tambah Kelompok';
+    document.getElementById('modal-subtitle').textContent = 'Isi data kelompok baru';
+    document.getElementById('modal-btn-text').textContent = 'Simpan Kelompok';
+    document.getElementById('modal-btn-icon').className   = 'fa-solid fa-floppy-disk';
+    document.getElementById('modal-nama').value           = '';
+    document.getElementById('modal-deskripsi').value      = '';
+    modalForm.action = "{{ url_for('auth.kelompok_tani_admin') }}";
+
+    // Uncheck semua
+    document.querySelectorAll('.anggota-cb').forEach(cb => cb.checked = false);
+    updateAnggotaCount();
+
+    modalOverlay.classList.add('active');
+    document.getElementById('modal-nama').focus();
+  }
+
+  function openEditModal(id, nama, deskripsi, anggotaIds) {
+    document.getElementById('modal-title').textContent    = 'Edit Kelompok';
+    document.getElementById('modal-subtitle').textContent = 'Perbarui data kelompok';
+    document.getElementById('modal-btn-text').textContent = 'Simpan Perubahan';
+    document.getElementById('modal-btn-icon').className   = 'fa-solid fa-pen-to-square';
+    document.getElementById('modal-nama').value           = nama;
+    document.getElementById('modal-deskripsi').value      = deskripsi;
+
+    // Edit: kirim ke route edit_kelompok_tani yang update nama + deskripsi + anggota
+    modalForm.action = `/admin/kelompok_tani/${id}/edit`;
+
+    // Check anggota yang sudah terdaftar
+    document.querySelectorAll('.anggota-cb').forEach(cb => {
+      cb.checked = anggotaIds.includes(parseInt(cb.value));
+    });
+    updateAnggotaCount();
+
+    modalOverlay.classList.add('active');
+    document.getElementById('modal-nama').focus();
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove('active');
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === modalOverlay) closeModal();
+  }
+
+  function updateAnggotaCount() {
+    const count = document.querySelectorAll('.anggota-cb:checked').length;
+    document.getElementById('anggota-count').textContent = count + ' dipilih';
+  }
+
+  /* ── Confirm Hapus ── */
+  function confirmHapus(id, nama) {
+    document.getElementById('confirm-nama').textContent = nama;
+    document.getElementById('hapus-form').action = `/admin/kelompok_tani/${id}/hapus`;
+    document.getElementById('confirm-overlay').classList.add('active');
+  }
+  function cancelHapus() {
+    document.getElementById('confirm-overlay').classList.remove('active');
+  }
+
+  /* ESC key */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeModal();
+      cancelHapus();
+    }
   });
 </script>
 </body>

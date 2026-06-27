@@ -2,11 +2,11 @@ import os
 from datetime import timedelta
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY")
+    SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key_here")
 
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
-        "mysql+pymysql://flask_user:flask_password@mysql_db:3306/flask_db"
+        "mysql+pymysql://root:@127.0.0.1:3306/padi_db"
     )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
