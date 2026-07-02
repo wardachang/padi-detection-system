@@ -89,6 +89,17 @@
       <span class="font-semibold text-sm">Varietas Padi</span>
     </a>
 
+    <!-- DATA PENYAKIT -->
+    <a href="{{ url_for('auth.penyakit') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl
+       {{ 'bg-emerald-500 text-white shadow-sm' if active == 'penyakit_admin' else 'text-slate-600 hover:bg-slate-50 transition' }}">
+
+      <i class="fa-solid fa-virus w-5
+      {{ 'text-white' if active == 'penyakit_admin' else 'text-emerald-500' }}"></i>
+
+      <span class="font-semibold text-sm">Data Penyakit</span>
+    </a>
+
     <!-- KELOMPOK TANI -->
     <div>
       <button onclick="toggleMenu('kelompok')"

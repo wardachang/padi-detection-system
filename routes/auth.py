@@ -35,6 +35,8 @@ from models.riwayat_deteksi import RiwayatDeteksi
 from models.varietas_padi import VarietasPadi
 from models.jadwal_tanam import JadwalTanam
 from models.kelompok_tani import KelompokTani
+from models.penyakit import Penyakit
+from models.penanganan_penyakit import PenangananPenyakit
 
 auth = Blueprint("auth", __name__)
 
@@ -458,7 +460,156 @@ def penyakit():
         flash("Akses ditolak.", "error")
         return redirect(url_for("auth.dashboard"))
 
-    return render_template("data_penyakit.html", active="penyakit_admin")
+    penyakit_list = Penyakit.query.order_by(Penyakit.nama_penyakit.asc()).all()
+    return render_template(
+        "data_penyakit.html",
+        penyakit_list=penyakit_list,
+        active="penyakit_admin"
+    )
+
+
+@auth.route("/admin/penyakit/tambah", methods=["GET", "POST"])
+@login_required
+def tambah_penyakit():
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    if request.method == "POST":
+        kode_penyakit = request.form.get("kode_penyakit", "").strip()
+        nama_penyakit = request.form.get("nama_penyakit", "").strip()
+        tingkat_keparahan = request.form.get("tingkat_keparahan", "Sedang").strip()
+        deskripsi = request.form.get("deskripsi", "").strip()
+        solutions = request.form.getlist("solutions[]")
+
+        if not kode_penyakit or not nama_penyakit:
+            flash("Kode penyakit dan nama penyakit wajib diisi.", "error")
+            return redirect(url_for("auth.tambah_penyakit"))
+
+        # Check unique kode_penyakit
+        cek = Penyakit.query.filter_by(kode_penyakit=kode_penyakit).first()
+        if cek:
+            flash("Kode penyakit sudah digunakan.", "error")
+            return redirect(url_for("auth.tambah_penyakit"))
+
+        # Create penyakit
+        penyakit = Penyakit(
+            kode_penyakit=kode_penyakit,
+            nama_penyakit=nama_penyakit,
+            tingkat_keparahan=tingkat_keparahan,
+            deskripsi=deskripsi,
+            dibuat_oleh=current_user.id
+        )
+        db.session.add(penyakit)
+        db.session.flush() # get id_penyakit
+
+        # Create solutions
+        for idx, sol in enumerate(solutions):
+            sol = sol.strip()
+            if sol:
+                pp = PenangananPenyakit(
+                    id_penyakit=penyakit.id_penyakit,
+                    jenis_penanganan="Solusi",
+                    judul_penanganan=sol,
+                    urutan=idx + 1
+                )
+                db.session.add(pp)
+
+        db.session.commit()
+        flash("Data penyakit berhasil ditambahkan.", "success")
+        return redirect(url_for("auth.penyakit"))
+
+    return render_template(
+        "form_penyakit.html",
+        title="Tambah Penyakit Padi",
+        form_action=url_for("auth.tambah_penyakit"),
+        penyakit=None,
+        solutions=[],
+        active="penyakit_admin"
+    )
+
+
+@auth.route("/admin/penyakit/edit/<int:id>", methods=["GET", "POST"])
+@login_required
+def edit_penyakit(id):
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    penyakit = Penyakit.query.get_or_404(id)
+    solutions = PenangananPenyakit.query.filter_by(id_penyakit=id).order_by(PenangananPenyakit.urutan.asc()).all()
+
+    if request.method == "POST":
+        kode_penyakit = request.form.get("kode_penyakit", "").strip()
+        nama_penyakit = request.form.get("nama_penyakit", "").strip()
+        tingkat_keparahan = request.form.get("tingkat_keparahan", "Sedang").strip()
+        deskripsi = request.form.get("deskripsi", "").strip()
+        new_solutions = request.form.getlist("solutions[]")
+
+        if not kode_penyakit or not nama_penyakit:
+            flash("Kode penyakit dan nama penyakit wajib diisi.", "error")
+            return redirect(url_for("auth.edit_penyakit", id=id))
+
+        # Check unique kode_penyakit excluding current
+        cek = Penyakit.query.filter(Penyakit.kode_penyakit == kode_penyakit, Penyakit.id_penyakit != id).first()
+        if cek:
+            flash("Kode penyakit sudah digunakan.", "error")
+            return redirect(url_for("auth.edit_penyakit", id=id))
+
+        # Update penyakit
+        penyakit.kode_penyakit = kode_penyakit
+        penyakit.nama_penyakit = nama_penyakit
+        penyakit.tingkat_keparahan = tingkat_keparahan
+        penyakit.deskripsi = deskripsi
+
+        # Update solutions: delete existing and re-insert
+        PenangananPenyakit.query.filter_by(id_penyakit=id).delete()
+        for idx, sol in enumerate(new_solutions):
+            sol = sol.strip()
+            if sol:
+                pp = PenangananPenyakit(
+                    id_penyakit=id,
+                    jenis_penanganan="Solusi",
+                    judul_penanganan=sol,
+                    urutan=idx + 1
+                )
+                db.session.add(pp)
+
+        db.session.commit()
+        flash("Data penyakit berhasil diperbarui.", "success")
+        return redirect(url_for("auth.penyakit"))
+
+    return render_template(
+        "form_penyakit.html",
+        title="Edit Penyakit Padi",
+        form_action=url_for("auth.edit_penyakit", id=id),
+        penyakit=penyakit,
+        solutions=solutions,
+        active="penyakit_admin"
+    )
+
+
+@auth.route("/admin/penyakit/delete/<int:id>", methods=["POST"])
+@login_required
+def delete_penyakit(id):
+    if current_user.role != "admin":
+        flash("Akses ditolak.", "error")
+        return redirect(url_for("auth.dashboard"))
+
+    penyakit = Penyakit.query.get_or_404(id)
+
+    try:
+        # Delete related solutions first
+        PenangananPenyakit.query.filter_by(id_penyakit=id).delete()
+        # Delete penyakit
+        db.session.delete(penyakit)
+        db.session.commit()
+        flash("Data penyakit berhasil dihapus.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Gagal menghapus penyakit karena data ini masih digunakan di tabel lain.", "error")
+
+    return redirect(url_for("auth.penyakit"))
 
 
 # =======================

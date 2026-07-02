@@ -279,11 +279,11 @@ def deteksi():
                         ]
 
                     else:
-                        info = disease_info.get(prediction)
-
-                        if info:
-                            desc = info.get("desc")
-                            solution = info.get("solution", [])
+                        p_db = Penyakit.query.filter_by(kode_penyakit=prediction).first()
+                        if p_db:
+                            desc = p_db.deskripsi
+                            sols = PenangananPenyakit.query.filter_by(id_penyakit=p_db.id_penyakit).order_by(PenangananPenyakit.urutan.asc()).all()
+                            solution = [s.judul_penanganan for s in sols]
                         else:
                             desc = "Informasi penyakit belum tersedia."
                             solution = []
@@ -377,11 +377,11 @@ def deteksi_admin():
                         ]
 
                     else:
-                        info = disease_info.get(prediction)
-
-                        if info:
-                            desc = info.get("desc")
-                            solution = info.get("solution", [])
+                        p_db = Penyakit.query.filter_by(kode_penyakit=prediction).first()
+                        if p_db:
+                            desc = p_db.deskripsi
+                            sols = PenangananPenyakit.query.filter_by(id_penyakit=p_db.id_penyakit).order_by(PenangananPenyakit.urutan.asc()).all()
+                            solution = [s.judul_penanganan for s in sols]
                         else:
                             desc = "Informasi penyakit belum tersedia."
                             solution = []
@@ -495,6 +495,13 @@ def hapus_semua_riwayat_admin():
 
     flash("Semua riwayat deteksi admin berhasil dihapus.", "success")
     return redirect(url_for("riwayat_admin"))
+
+with app.app_context():
+    try:
+        from utils.seeder_helper import seed_diseases_if_empty
+        seed_diseases_if_empty()
+    except Exception as e:
+        print("Error during database seed check:", e)
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False)

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ title }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body { font-family: "Inter", sans-serif; }
+
+    /* Mobile sidebar overlay */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 30;
+    }
+    #sidebar-overlay.active { display: block; }
+
+    /* Sidebar: hidden on mobile, shown on desktop */
+    #sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 240px;
+      z-index: 40;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    #sidebar.open { transform: translateX(0); }
+
+    @media (min-width: 1024px) {
+      #sidebar {
+        position: relative;
+        transform: translateX(0);
+        flex-shrink: 0;
+      }
+      #sidebar-overlay { display: none !important; }
+      #mobile-menu-btn { display: none; }
+    }
+  </style>
+</head>
+
+<body class="h-full bg-[#F3F6F3] text-slate-900">
+<div class="min-h-screen flex">
+
+  <!-- Overlay for mobile sidebar -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <div id="sidebar" class="bg-white border-r border-slate-200 flex flex-col">
+    {% include 'sidebar_admin.html' %}
+  </div>
+
+  <main class="flex-1 min-w-0">
+    <!-- Mobile top bar -->
+    <div class="h-14 bg-white border-b border-slate-200 flex items-center px-4 lg:hidden gap-3 sticky top-0 z-20">
+      <button id="mobile-menu-btn"
+              onclick="openSidebar()"
+              class="p-2 rounded-lg hover:bg-slate-200 transition">
+        <i class="fa-solid fa-bars text-slate-600"></i>
+      </button>
+      <span class="font-extrabold text-sm text-slate-700">{{ title }}</span>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+      <div class="bg-white rounded-2xl shadow border border-slate-200 p-5 sm:p-8">
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800">{{ title }}</h1>
+        <p class="text-sm text-slate-500 mt-1">Kelola data informasi penyakit padi dan solusi penanganannya.</p>
+
+        <!-- FLASH MESSAGE -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mt-4 space-y-2">
+              {% for category, message in messages %}
+                <div class="rounded-xl px-4 py-3 text-sm font-semibold
+                  {% if category == 'success' %}
+                    bg-green-100 text-green-700 border border-green-200
+                  {% else %}
+                    bg-red-100 text-red-700 border border-red-200
+                  {% endif %}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ form_action }}" class="mt-6 space-y-5">
+
+          <!-- KODE PENYAKIT & NAMA PENYAKIT -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Kode Penyakit (Sesuai Model ML)</label>
+              <input type="text" name="kode_penyakit"
+                     value="{{ penyakit.kode_penyakit if penyakit else '' }}"
+                     placeholder="Contoh: Leaf Blast"
+                     class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
+                     required>
+              <p class="text-xs text-slate-400 mt-1">Harus sama persis dengan label yang dihasilkan oleh model deteksi penyakit padi.</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Nama Penyakit (Tampilan UI)</label>
+              <input type="text" name="nama_penyakit"
+                     value="{{ penyakit.nama_penyakit if penyakit else '' }}"
+                     placeholder="Contoh: Blas Daun"
+                     class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
+                     required>
+              <p class="text-xs text-slate-400 mt-1">Nama penyakit dalam Bahasa Indonesia yang akan ditampilkan pada UI deteksi.</p>
+            </div>
+          </div>
+
+          <!-- TINGKAT KEPARAHAN -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-2">Tingkat Keparahan</label>
+            <select name="tingkat_keparahan"
+                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition bg-white">
+              <option value="Ringan" {% if penyakit and penyakit.tingkat_keparahan == 'Ringan' %}selected{% endif %}>Ringan</option>
+              <option value="Sedang" {% if penyakit and penyakit.tingkat_keparahan == 'Sedang' or not penyakit %}selected{% endif %}>Sedang</option>
+              <option value="Berat" {% if penyakit and penyakit.tingkat_keparahan == 'Berat' %}selected{% endif %}>Berat</option>
+            </select>
+          </div>
+
+          <!-- DESKRIPSI -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-2">Deskripsi Penyakit</label>
+            <textarea name="deskripsi" rows="4" placeholder="Tuliskan deskripsi lengkap mengenai gejala dan dampak penyakit padi ini..."
+                      class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
+                      required>{{ penyakit.deskripsi if penyakit else '' }}</textarea>
+          </div>
+
+          <!-- DYNAMIC SOLUTIONS -->
+          <div class="border-t border-slate-200 pt-5">
+            <h3 class="text-base font-bold text-slate-800 mb-1">Daftar Solusi Penanganan</h3>
+            <p class="text-xs text-slate-500 mb-4">Tambahkan instruksi solusi penanganan yang detail dan terstruktur bagi petani.</p>
+
+            <div id="solutions-container" class="space-y-3">
+              <!-- Solutions fields will be appended here dynamically -->
+            </div>
+
+            <button type="button" onclick="addSolutionField()"
+                    class="mt-3 inline-flex items-center gap-2 rounded-xl border border-emerald-500 px-4 py-2.5 text-emerald-600 font-bold hover:bg-emerald-50 transition text-sm">
+              <i class="fa-solid fa-plus text-xs"></i>
+              Tambah Solusi
+            </button>
+          </div>
+
+          <!-- FORM SUBMIT BUTTONS -->
+          <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100">
+            <a href="{{ url_for('auth.penyakit') }}"
+               class="flex-1 sm:flex-none text-center px-6 py-3 rounded-xl bg-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-300 transition">
+              Kembali
+            </a>
+            <button type="submit"
+                    class="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-emerald-500 text-white font-bold text-sm hover:brightness-95 transition shadow-sm">
+              Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('active');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+  }
+
+  // Handle solutions list dynamically
+  const container = document.getElementById("solutions-container");
+
+  function addSolutionField(value = "") {
+    const div = document.createElement("div");
+    div.className = "flex items-center gap-3 solution-item transition-all duration-200";
+    div.innerHTML = `
+      <div class="flex-grow">
+        <input type="text" name="solutions[]" value="${escapeHtml(value)}"
+               placeholder="Contoh: Lakukan pemupukan berimbang dan kurangi pemakaian nitrogen."
+               class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
+               required>
+      </div>
+      <button type="button" onclick="this.parentElement.remove()"
+              class="p-3 text-red-500 hover:text-red-700 transition hover:bg-red-50 rounded-xl"
+              title="Hapus Solusi">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    `;
+    container.appendChild(div);
+  }
+
+  function escapeHtml(text) {
+    if (!text) return "";
+    return text
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+  }
+
+  // Prepopulate if editing
+  {% if solutions %}
+    {% for sol in solutions %}
+      addSolutionField({{ sol.judul_penanganan|tojson }});
+    {% endfor %}
+  {% else %}
+    addSolutionField("");
+  {% endif %}
+</script>
+</body>
+</html>
